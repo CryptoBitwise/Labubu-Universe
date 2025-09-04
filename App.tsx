@@ -6,10 +6,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Animated, Modal, Dimensions, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Animated, Modal, Dimensions, Easing, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import BrowseFiguresScreen from './BrowseFiguresScreen';
 import CollectionScreen from './CollectionScreen';
+import LabubuList from './LabubuList';
 import { colors, spacing, fontSizes, gradients, shadows } from './designSystem';
 const labubupink = require('./assets/labubupink.png');
 
@@ -183,11 +184,20 @@ function DisplayStudioButton({ onPress }: { onPress: () => void }) {
   );
 }
 
+function LabubuShopButton({ onPress }: { onPress: () => void }) {
+  return (
+    <AnimatedButton style={[styles.moduleCard, styles.shopCard]} onPress={onPress}>
+      <Text style={styles.moduleTitle}>Labubu Shop 🛒</Text>
+      <Text style={styles.moduleDesc}>Browse all figures and buy directly from Pop Mart! 💖</Text>
+    </AnimatedButton>
+  );
+}
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [screen, setScreen] = useState<'home' | 'browse' | 'collection'>('home');
+  const [screen, setScreen] = useState<'home' | 'browse' | 'collection' | 'labubulist'>('home');
   const [owned, setOwned] = useState<string[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [showLore, setShowLore] = useState(false);
@@ -322,6 +332,27 @@ export default function App() {
       />
     );
   }
+  if (screen === 'labubulist') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <LinearGradient colors={gradients.header} style={styles.headerGradient}>
+          <View style={styles.headerContent}>
+            <TouchableOpacity
+              style={styles.standardBackButton}
+              onPress={() => setScreen('home')}
+            >
+              <Text style={styles.standardBackButtonText}>← Back to Home</Text>
+            </TouchableOpacity>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.header}>Labubu Shop 🛒</Text>
+              <Text style={styles.headerTagline}>Browse & Buy Your Favorites!</Text>
+            </View>
+          </View>
+        </LinearGradient>
+        <LabubuList />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} pointerEvents="box-none">
@@ -364,15 +395,20 @@ export default function App() {
         <Text style={styles.header}>
           Labubu Universe ✨
         </Text>
-        <Text style={styles.headerTagline}>Your Magical Collector’s Playground!</Text>
+        <Text style={styles.headerTagline}>Your Magical Collector's Playground!</Text>
       </LinearGradient>
-      {/* 2x2 grid of independent module cards */}
-      <View style={styles.centeredCardsContainer}>
+      {/* Scrollable module cards */}
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <LoreDiscoveryButton onPress={() => setShowLore(true)} />
         <MyCollectionButton onPress={() => setScreen('collection')} />
+        <LabubuShopButton onPress={() => setScreen('labubulist')} />
         <TradingHubButton onPress={() => Alert.alert('Coming Soon!')} />
         <DisplayStudioButton onPress={() => Alert.alert('Coming Soon!')} />
-      </View>
+      </ScrollView>
       <LoreModal />
     </SafeAreaView>
   );
@@ -528,9 +564,19 @@ const styles = StyleSheet.create({
   centeredCardsContainer: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 20,
+    paddingTop: 20,
     width: '100%',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   moduleCard: {
     backgroundColor: colors.card,
@@ -538,7 +584,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.lg,
     width: 280,
-    marginBottom: 20,
+    marginBottom: 15,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
@@ -575,6 +621,46 @@ const styles = StyleSheet.create({
     borderColor: '#FFE5C7',
     borderWidth: 2,
     shadowColor: '#FFE5C7',
+  },
+  shopCard: {
+    borderColor: '#FFB6C1',
+    borderWidth: 2,
+    shadowColor: '#FFB6C1',
+  },
+  backButton: {
+    position: 'absolute',
+    left: spacing.lg,
+    top: spacing.lg,
+    padding: spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    ...shadows.card,
+  },
+  backButtonText: {
+    fontSize: fontSizes.md,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  headerTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  standardBackButton: {
+    marginRight: spacing.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 12,
+    backgroundColor: colors.accent,
+  },
+  standardBackButtonText: {
+    color: colors.text,
+    fontSize: fontSizes.sm,
+    fontWeight: 'bold',
   },
   bgIcon: {
     position: 'absolute',

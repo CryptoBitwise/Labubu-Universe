@@ -13,6 +13,7 @@ export type LabubuFigure = {
     features: string[];
     description: string;
     dimensions: string;
+    buyLink: string; // New field for Pop Mart purchase link
 };
 
 export const labubuFigures: LabubuFigure[] = [
@@ -30,7 +31,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/soy-milk-macaron.jpg",
         features: ["Blind box set", "Pastel theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as soymilk macaron, pastel plush pendant from the classic hyped series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123" // Fallback: often sold out on Pop Mart
     },
     {
         id: 2,
@@ -45,7 +47,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/pistachio-macaron.jpg",
         features: ["Blind box set", "Green theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as pistachio macaron, green plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 3,
@@ -60,7 +63,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/strawberry-macaron.jpg",
         features: ["Blind box set", "Pink theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as strawberry macaron, pink plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 4,
@@ -75,7 +79,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/blueberry-macaron.jpg",
         features: ["Blind box set", "Blue theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as blueberry macaron, blue plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 5,
@@ -90,7 +95,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/lemon-macaron.jpg",
         features: ["Blind box set", "Yellow theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as lemon macaron, yellow plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 6,
@@ -105,7 +111,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/matcha-macaron.jpg",
         features: ["Blind box set", "Matcha theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as matcha macaron, green plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 7,
@@ -120,7 +127,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/raspberry-macaron.jpg",
         features: ["Blind box set", "Red theme", "Macaron design", "Vinyl plush pendant"],
         description: "Labubu as raspberry macaron, red plush pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     {
         id: 8,
@@ -135,7 +143,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/chestnut-cocoa-secret.jpg",
         features: ["Secret variant", "1:72 odds", "Highly sought-after", "Premium design"],
         description: "Rare chestnut cocoa variant, highly sought-after pendant from the classic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.amazon.com/stores/POPMART/page/123"
     },
     // Have a Seat Series (V2) - 2024-07
     {
@@ -151,7 +160,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/sit-pretty.jpg",
         features: ["Seated pose", "Softer design", "Calmer theme", "Vinyl plush pendant"],
         description: "Labubu in a pretty seated pose, softer and calmer design from V2 series.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 10,
@@ -166,7 +176,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/cozy-chair.jpg",
         features: ["Chair pose", "Cozy design", "Relaxed theme", "Vinyl plush pendant"],
         description: "Labubu in a cozy chair pose, relaxed and comfortable design.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 11,
@@ -181,7 +192,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/lounge-time.jpg",
         features: ["Lounge pose", "Relaxed design", "Chill theme", "Vinyl plush pendant"],
         description: "Labubu in a lounge time pose, relaxed and chill design.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 12,
@@ -196,7 +208,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/relax-mode.jpg",
         features: ["Relaxed pose", "Chill design", "Calm theme", "Vinyl plush pendant"],
         description: "Labubu in relax mode, calm and peaceful design.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 13,
@@ -211,7 +224,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/chill-spot.jpg",
         features: ["Chill pose", "Relaxed design", "Comfortable theme", "Vinyl plush pendant"],
         description: "Labubu in a chill spot pose, comfortable and relaxed design.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 14,
@@ -226,7 +240,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/rest-easy.jpg",
         features: ["Rest pose", "Peaceful design", "Calm theme", "Vinyl plush pendant"],
         description: "Labubu in a rest easy pose, peaceful and calm design.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     {
         id: 15,
@@ -241,7 +256,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/duoduo-secret.jpg",
         features: ["Secret variant", "Seated pose", "Rare collectible", "Party theme"],
         description: "Rare DuoDuo secret variant, seated relaxed pose from V2 series.",
-        dimensions: "15cm / 5.9 inches"
+        dimensions: "15cm / 5.9 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/50"
     },
     // Fall in Wild (Keychain Pendant) - 2024-07
     {
@@ -257,7 +273,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/fall-in-wild-keychain.jpg",
         features: ["Keychain-style pendant", "Vinyl face", "Soft plush body", "Bag charm", "Seasonal variant"],
         description: "Playful Labubu in wilderness-themed outfit, seasonal keychain variant; non-blind box release.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     // Let's Checkmate (Hanging Card Pendant) - 2025-02
     {
@@ -273,7 +290,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/pawn-labubu.jpg",
         features: ["Chess-themed pose", "Pawn design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess pawn, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 18,
@@ -288,7 +306,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/knight-labubu.jpg",
         features: ["Chess-themed pose", "Knight design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess knight, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 19,
@@ -303,7 +322,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/bishop-labubu.jpg",
         features: ["Chess-themed pose", "Bishop design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess bishop, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 20,
@@ -318,7 +338,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/rook-labubu.jpg",
         features: ["Chess-themed pose", "Rook design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess rook, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 21,
@@ -333,7 +354,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/queen-labubu.jpg",
         features: ["Chess-themed pose", "Queen design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess queen, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 22,
@@ -348,7 +370,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/king-labubu.jpg",
         features: ["Chess-themed pose", "King design", "Vinyl plush pendant", "Strategic theme"],
         description: "Labubu as chess king, vinyl plush pendant with strategic chess theme.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     {
         id: 23,
@@ -363,7 +386,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/checkmate-secret.jpg",
         features: ["Secret variant", "Chess theme", "Rare collectible", "Strategic design"],
         description: "Rare checkmate variant, secret chess-themed pendant from the strategic series.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/products/1897/the-monsters-let-s-checkmate-series-vinyl-plush-hanging-card"
     },
     // The Monsters x One Piece Series - 2025-02
     {
@@ -379,7 +403,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-luffy.jpg",
         features: ["One Piece collab", "Luffy cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Monkey D. Luffy from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 25,
@@ -394,7 +419,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-zoro.jpg",
         features: ["One Piece collab", "Zoro cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Roronoa Zoro from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 26,
@@ -409,7 +435,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-nami.jpg",
         features: ["One Piece collab", "Nami cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Nami from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 27,
@@ -424,7 +451,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-usopp.jpg",
         features: ["One Piece collab", "Usopp cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Usopp from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 28,
@@ -439,7 +467,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-sanji.jpg",
         features: ["One Piece collab", "Sanji cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Sanji from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 29,
@@ -454,7 +483,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-chopper.jpg",
         features: ["One Piece collab", "Chopper cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Tony Tony Chopper from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 30,
@@ -469,7 +499,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-robin.jpg",
         features: ["One Piece collab", "Robin cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Nico Robin from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 31,
@@ -484,7 +515,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-franky.jpg",
         features: ["One Piece collab", "Franky cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Franky from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 32,
@@ -499,7 +531,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-brook.jpg",
         features: ["One Piece collab", "Brook cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Brook from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 33,
@@ -514,7 +547,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-jinbe.jpg",
         features: ["One Piece collab", "Jinbe cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Jinbe from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 34,
@@ -529,7 +563,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-yamato.jpg",
         features: ["One Piece collab", "Yamato cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Yamato from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 35,
@@ -544,7 +579,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-ace.jpg",
         features: ["One Piece collab", "Ace cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Portgas D. Ace from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 36,
@@ -559,7 +595,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/labubu-sabo.jpg",
         features: ["One Piece collab", "Sabo cosplay", "Smaller figure", "Vinyl figure blind box"],
         description: "Labubu cosplaying as Sabo from One Piece, collaboration series with smaller figures.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     {
         id: 37,
@@ -574,7 +611,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/one-piece-secret.jpg",
         features: ["Secret variant", "One Piece collab", "Rare collectible", "Special cosplay design"],
         description: "Rare cosplay variant from One Piece collaboration, secret collectible with special design.",
-        dimensions: "8-10cm / 3-4 inches"
+        dimensions: "8-10cm / 3-4 inches",
+        buyLink: "https://www.popmart.com/us/collections/the-monsters"
     },
     // Big into Energy Series (V3) - 2025-04
     {
@@ -590,7 +628,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/luck-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing luck energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 39,
@@ -605,7 +644,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/joy-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing joy energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 40,
@@ -620,7 +660,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/courage-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing courage energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 41,
@@ -635,7 +676,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/passion-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing passion energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 42,
@@ -650,7 +692,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/peace-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing peace energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 43,
@@ -665,7 +708,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/hope-energy.jpg",
         features: ["Emotion-themed", "Colored teeth/nails", "Energy design", "Vinyl plush pendant"],
         description: "Labubu representing hope energy, emotion-themed with colored teeth and nails.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     {
         id: 44,
@@ -680,7 +724,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/rainbow-energy-secret.jpg",
         features: ["Secret variant", "Rainbow energy", "Rare collectible", "Special design"],
         description: "Rare rainbow energy variant, secret collectible with special rainbow design.",
-        dimensions: "17cm / 6.7 inches"
+        dimensions: "17cm / 6.7 inches",
+        buyLink: "https://www.popmart.com/us/pop-now/set/195"
     },
     // Wacky Mart Series - 2025-06-13
     {
@@ -696,7 +741,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/snack-attack.jpg",
         features: ["Snack-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in snack attack mode, snack-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 46,
@@ -711,7 +757,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/candy-crush.jpg",
         features: ["Candy-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in candy crush mode, candy-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 47,
@@ -726,7 +773,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/popcorn-panic.jpg",
         features: ["Popcorn-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in popcorn panic mode, popcorn-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 48,
@@ -741,7 +789,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/soda-splash.jpg",
         features: ["Soda-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in soda splash mode, soda-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 49,
@@ -756,7 +805,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/chip-chaos.jpg",
         features: ["Chip-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in chip chaos mode, chip-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 50,
@@ -771,7 +821,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/gum-gobble.jpg",
         features: ["Gum-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in gum gobble mode, gum-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 51,
@@ -786,7 +837,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/ice-cream-insanity.jpg",
         features: ["Ice cream-themed", "Electronic components", "PVC/ABS figure", "Attitude design"],
         description: "Labubu in ice cream insanity mode, ice cream-themed figure with electronic components and attitude design.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     {
         id: 52,
@@ -801,7 +853,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/wacky-cashier-secret.jpg",
         features: ["Secret variant", "Cashier design", "Electronic components", "Rare collectible"],
         description: "Rare wacky cashier variant, secret collectible with cashier design and electronic components.",
-        dimensions: "5.6-9.5cm / 2.2-3.74 inches"
+        dimensions: "5.6-9.5cm / 2.2-3.74 inches",
+        buyLink: "https://www.popmart.com/us/collections/labubu"
     },
     // Summer Ride Figure - 2025-08-15
     {
@@ -817,7 +870,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/summer-ride.jpg",
         features: ["Mountain bike", "Adventure theme", "Seasonal release", "Standalone figure", "PVC/ABS"],
         description: "Labubu on mountain bike, seasonal adventure theme; non-blind, standalone hyped release.",
-        dimensions: "10cm / 3.94 inches"
+        dimensions: "10cm / 3.94 inches",
+        buyLink: "https://www.popmart.com/us/products/3448/labubu-summer-ride-figure"
     },
     // Pin for Love Series - 2025-08-28 (Sample of A-Z series)
     {
@@ -833,7 +887,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/a-love.jpg",
         features: ["Letter A theme", "Mini pendant", "Love design", "Smaller scale", "Vinyl plush pendant"],
         description: "Labubu representing love with letter A theme, mini pendant one-third original size from the hyped recent drop.",
-        dimensions: "10.5cm / 4.13 inches (excluding loop)"
+        dimensions: "10.5cm / 4.13 inches (excluding loop)",
+        buyLink: "https://www.popmart.com/us/collection/174/pin-for-love"
     },
     {
         id: 55,
@@ -848,7 +903,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/b-hug.jpg",
         features: ["Letter B theme", "Mini pendant", "Hug design", "Smaller scale", "Vinyl plush pendant"],
         description: "Labubu representing hug with letter B theme, mini pendant one-third original size from the hyped recent drop.",
-        dimensions: "10.5cm / 4.13 inches (excluding loop)"
+        dimensions: "10.5cm / 4.13 inches (excluding loop)",
+        buyLink: "https://www.popmart.com/us/collection/174/pin-for-love"
     },
     {
         id: 56,
@@ -863,7 +919,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/c-kiss.jpg",
         features: ["Letter C theme", "Mini pendant", "Kiss design", "Smaller scale", "Vinyl plush pendant"],
         description: "Labubu representing kiss with letter C theme, mini pendant one-third original size from the hyped recent drop.",
-        dimensions: "10.5cm / 4.13 inches (excluding loop)"
+        dimensions: "10.5cm / 4.13 inches (excluding loop)",
+        buyLink: "https://www.popmart.com/us/collection/174/pin-for-love"
     },
     {
         id: 57,
@@ -878,7 +935,8 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/z-eternal.jpg",
         features: ["Letter Z theme", "Mini pendant", "Eternal design", "Smaller scale", "Vinyl plush pendant"],
         description: "Labubu representing eternal with letter Z theme, mini pendant one-third original size from the hyped recent drop.",
-        dimensions: "10.5cm / 4.13 inches (excluding loop)"
+        dimensions: "10.5cm / 4.13 inches (excluding loop)",
+        buyLink: "https://www.popmart.com/us/collection/174/pin-for-love"
     },
     {
         id: 58,
@@ -893,6 +951,7 @@ export const labubuFigures: LabubuFigure[] = [
         imageUrl: "assets/love-letter-secret.jpg",
         features: ["Secret variant", "Love letter design", "Mini pendant", "Rare collectible", "Smaller scale"],
         description: "Rare love letter variant, secret collectible mini pendant from the very hyped recent drop.",
-        dimensions: "10.5cm / 4.13 inches (excluding loop)"
+        dimensions: "10.5cm / 4.13 inches (excluding loop)",
+        buyLink: "https://www.popmart.com/us/collection/174/pin-for-love"
     }
-]; 
+];
