@@ -10,21 +10,29 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-firebase/app": "^23.3.0",
+    "@react-native-firebase/auth": "^23.3.0",
+    "@react-native-firebase/firestore": "^23.3.0",
+    "@react-native-firebase/storage": "^23.3.0",
     "@react-native/new-app-screen": "0.80.1",
+    "firebase": "^11.10.0",
     "react": "19.1.0",
-    "react-native": "0.80.1",
-    "react-native-linear-gradient": "^2.8.3"
+    "react-native": "^0.81.1",
+    "react-native-get-random-values": "^1.11.0",
+    "react-native-linear-gradient": "^2.8.3",
+    "react-native-permissions": "^5.4.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "19.0.0",
+    "@react-native-community/cli": "^20.0.1",
     "@react-native-community/cli-platform-android": "19.0.0",
     "@react-native-community/cli-platform-ios": "19.0.0",
     "@react-native/babel-preset": "0.80.1",
     "@react-native/eslint-config": "0.80.1",
-    "@react-native/metro-config": "0.80.1",
+    "@react-native/metro-config": "^0.81.1",
     "@react-native/typescript-config": "0.80.1",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.1.0",

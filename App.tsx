@@ -6,11 +6,12 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Animated, Modal, Dimensions, Easing, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Animated, Modal, Dimensions, Easing, ScrollView, AppState } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import BrowseFiguresScreen from './BrowseFiguresScreen';
 import CollectionScreen from './CollectionScreen';
 import LabubuList from './LabubuList';
+import { CollectionService, CollectionItem } from './collectionService';
 import { colors, spacing, fontSizes, gradients, shadows } from './designSystem';
 const labubupink = require('./assets/labubupink.png');
 
@@ -184,11 +185,21 @@ function DisplayStudioButton({ onPress }: { onPress: () => void }) {
   );
 }
 
+
 function LabubuShopButton({ onPress }: { onPress: () => void }) {
   return (
     <AnimatedButton style={[styles.moduleCard, styles.shopCard]} onPress={onPress}>
       <Text style={styles.moduleTitle}>Labubu Shop 🛒</Text>
       <Text style={styles.moduleDesc}>Browse all figures and buy directly from Pop Mart! 💖</Text>
+    </AnimatedButton>
+  );
+}
+
+function PhotoStudioButton({ onPress }: { onPress: () => void }) {
+  return (
+    <AnimatedButton style={[styles.moduleCard, styles.photoCard]} onPress={onPress}>
+      <Text style={styles.moduleTitle}>Photo Studio 📸</Text>
+      <Text style={styles.moduleDesc}>Upload and share photos of your Labubu collection! (Coming Soon) ✨</Text>
     </AnimatedButton>
   );
 }
@@ -205,40 +216,161 @@ export default function App() {
 
   const [collectionItems, setCollectionItems] = useState<CollectionItem[]>([]);
 
-  const addToOwned = (id: string) => {
-    if (!owned.includes(id)) {
-      setOwned([...owned, id]);
-      setWishlist(wishlist.filter(fid => fid !== id));
-      Alert.alert('Added to Owned!');
-    }
-  };
-  const addToWishlist = (id: string) => {
-    if (!wishlist.includes(id) && !owned.includes(id)) {
-      setWishlist([...wishlist, id]);
-      Alert.alert('Added to Wishlist!');
+  // Save collection to Firebase Firestore (with local backup)
+  const saveCollection = async (items: CollectionItem[]) => {
+    try {
+      const userId = CollectionService.getUserId();
+
+      // Save to Firebase Firestore
+      const firestoreSuccess = await CollectionService.saveCollection(userId, items);
+
+      // Also save to local storage as backup
+      await CollectionService.syncWithLocalStorage(items);
+    } catch (error) {
+      console.error('Error saving collection:', error);
     }
   };
 
-  const moveToOwned = (id: string) => {
+  // Load collection from Firebase Firestore (with local fallback)
+  const loadCollection = async () => {
+    try {
+      const userId = CollectionService.getUserId();
+
+      // Try to load from Firebase first
+      let items = await CollectionService.loadCollection(userId);
+
+      // If Firebase is empty or failed, try local storage as fallback
+      if (!items || items.length === 0) {
+        items = await CollectionService.loadFromLocalStorage();
+
+        // If we found items in local storage, sync them to Firebase
+        if (items && items.length > 0) {
+          await CollectionService.saveCollection(userId, items);
+        }
+      }
+
+      // Ensure items is always an array
+      const safeItems = Array.isArray(items) ? items : [];
+      setCollectionItems(safeItems);
+
+      // Sync loaded collection back to owned/wishlist arrays for UI display
+      const loadedOwned: string[] = [];
+      const loadedWishlist: string[] = [];
+
+      safeItems.forEach(item => {
+        if (item.status === 'owned') {
+          loadedOwned.push(item.figureId);
+        } else if (item.status === 'wishlist') {
+          loadedWishlist.push(item.figureId);
+        }
+      });
+
+      setOwned(loadedOwned);
+      setWishlist(loadedWishlist);
+    } catch (error) {
+      console.error('Error loading collection:', error);
+      // Fallback to local storage only
+      try {
+        const items = await CollectionService.loadFromLocalStorage();
+        setCollectionItems(items);
+      } catch (localError) {
+        console.error('Local storage fallback also failed:', localError);
+      }
+    }
+  };
+
+  // Load collection on app start
+  useEffect(() => {
+    loadCollection();
+  }, []);
+
+  // Save collection when app goes to background
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        saveCollection(collectionItems);
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [collectionItems]);
+
+  const addToOwned = useCallback((id: string) => {
     if (!owned.includes(id)) {
       setOwned([...owned, id]);
       setWishlist(wishlist.filter(fid => fid !== id));
+
+      // Update collectionItems for Firebase persistence
+      const newItem: CollectionItem = {
+        figureId: id,
+        status: 'owned',
+        addedAt: new Date().toISOString()
+      };
+      const updatedCollection = collectionItems.filter(item => item.figureId !== id);
+      updatedCollection.push(newItem);
+      setCollectionItems(updatedCollection);
+
+      Alert.alert('Added to Owned!');
+    }
+  }, [owned, wishlist, collectionItems]);
+  const addToWishlist = useCallback((id: string) => {
+    if (!wishlist.includes(id) && !owned.includes(id)) {
+      setWishlist([...wishlist, id]);
+
+      // Update collectionItems for Firebase persistence
+      const newItem: CollectionItem = {
+        figureId: id,
+        status: 'wishlist',
+        addedAt: new Date().toISOString()
+      };
+      const updatedCollection = collectionItems.filter(item => item.figureId !== id);
+      updatedCollection.push(newItem);
+      setCollectionItems(updatedCollection);
+
+      Alert.alert('Added to Wishlist!');
+    }
+  }, [wishlist, owned, collectionItems]);
+
+  const moveToOwned = useCallback((id: string) => {
+    if (!owned.includes(id)) {
+      setOwned([...owned, id]);
+      setWishlist(wishlist.filter(fid => fid !== id));
+
+      // Update collectionItems for Firebase persistence
+      const updatedCollection = collectionItems.map(item =>
+        item.figureId === id ? { ...item, status: 'owned' } : item
+      );
+      setCollectionItems(updatedCollection);
+
       Alert.alert('Moved to Owned!');
     }
-  };
-  const moveToWishlist = (id: string) => {
+  }, [owned, wishlist, collectionItems]);
+  const moveToWishlist = useCallback((id: string) => {
     if (!wishlist.includes(id)) {
       setWishlist([...wishlist, id]);
       setOwned(owned.filter(fid => fid !== id));
+
+      // Update collectionItems for Firebase persistence
+      const updatedCollection = collectionItems.map(item =>
+        item.figureId === id ? { ...item, status: 'wishlist' } : item
+      );
+      setCollectionItems(updatedCollection);
+
       Alert.alert('Moved to Wishlist!');
     }
-  };
-  const removeCompletely = (id: string) => {
+  }, [wishlist, owned, collectionItems]);
+  const removeCompletely = useCallback((id: string) => {
     setOwned(owned.filter(fid => fid !== id));
     setWishlist(wishlist.filter(fid => fid !== id));
     // Also remove from collection items
-    setCollectionItems(collectionItems.filter(item => item.figureId !== id));
-  };
+    const updatedCollection = collectionItems.filter(item => item.figureId !== id);
+    setCollectionItems(updatedCollection);
+    saveCollection(updatedCollection);
+  }, [owned, wishlist, collectionItems, saveCollection]);
 
 
 
@@ -328,7 +460,10 @@ export default function App() {
         moveToWishlist={id => { moveToWishlist(id); }}
         removeCompletely={id => { removeCompletely(id); }}
         onUpdatePhoto={() => { }} // Photo handling is now done locally in CollectionScreen
-        onUpdateCollectionItems={setCollectionItems}
+        onUpdateCollectionItems={(items) => {
+          setCollectionItems(items);
+          saveCollection(items);
+        }}
       />
     );
   }
@@ -353,6 +488,7 @@ export default function App() {
       </SafeAreaView>
     );
   }
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} pointerEvents="box-none">
@@ -402,10 +538,13 @@ export default function App() {
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContentContainer}
         showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
       >
         <LoreDiscoveryButton onPress={() => setShowLore(true)} />
         <MyCollectionButton onPress={() => setScreen('collection')} />
         <LabubuShopButton onPress={() => setScreen('labubulist')} />
+        <PhotoStudioButton onPress={() => Alert.alert('Coming Soon!', 'Photo Studio feature will be available in a future update! 📸✨')} />
         <TradingHubButton onPress={() => Alert.alert('Coming Soon!')} />
         <DisplayStudioButton onPress={() => Alert.alert('Coming Soon!')} />
       </ScrollView>
@@ -576,7 +715,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 100, // Increased padding to ensure all buttons are visible
   },
   moduleCard: {
     backgroundColor: colors.card,
@@ -626,6 +765,11 @@ const styles = StyleSheet.create({
     borderColor: '#FFB6C1',
     borderWidth: 2,
     shadowColor: '#FFB6C1',
+  },
+  photoCard: {
+    borderColor: '#FFD700',
+    borderWidth: 2,
+    shadowColor: '#FFD700',
   },
   backButton: {
     position: 'absolute',

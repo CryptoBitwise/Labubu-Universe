@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "205489021290",
+    "project_id": "labubu-universe",
+    "storage_bucket": "labubu-universe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:205489021290:android:056f47076b7d6473bb8513",
+        "android_client_info": {
+          "package_name": "com.labubuuniverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYn2g80-Sg2acU9_VxF3JvYsI8oy-YDOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
