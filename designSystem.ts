@@ -51,4 +51,10 @@ export const shadows = {
 
 export const gradients = {
     header: [colors.gradientStart, colors.gradientEnd],
+};
+
+// Collection limits
+export const COLLECTION_LIMITS = {
+    BETA_MAX_FIGURES: 15, // Maximum figures for beta users
+    PREMIUM_MAX_FIGURES: 999, // Unlimited for premium users (placeholder)
 }; 

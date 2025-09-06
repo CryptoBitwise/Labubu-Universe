@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Animated, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Animated, Image, Alert, Modal } from 'react-native';
 import { ALL_LABUBU_FIGURES } from './labubu_blind_box_data.js';
-import { colors, spacing, fontSizes, shadows } from './designSystem';
+import { colors, spacing, fontSizes, shadows, COLLECTION_LIMITS } from './designSystem';
 import PhotoPicker from './PhotoPicker';
 import { CollectionService } from './collectionService';
 
@@ -67,6 +67,7 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
     const [loading, setLoading] = useState(true);
     const [showPhotoPicker, setShowPhotoPicker] = useState(false);
     const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null);
+    const [showLimitModal, setShowLimitModal] = useState(false);
     const ownedFigures = ALL_LABUBU_FIGURES.filter(f => owned.includes(f.id.toString()));
     const wishlistFigures = ALL_LABUBU_FIGURES.filter(f => wishlist.includes(f.id.toString()));
     const ownedCount = ownedFigures.length;
@@ -227,6 +228,38 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
         }
     }
 
+    // Collection Limit Modal Component
+    const CollectionLimitModal = () => (
+        <Modal
+            visible={showLimitModal}
+            animationType="fade"
+            transparent
+            onRequestClose={() => setShowLimitModal(false)}
+        >
+            <View style={styles.limitModalOverlay}>
+                <View style={styles.limitModalBox}>
+                    <Text style={styles.limitModalTitle}>Beta Collection Limit Reached! 🚫</Text>
+                    <Text style={styles.limitModalMessage}>
+                        You've reached the maximum of {COLLECTION_LIMITS.BETA_MAX_FIGURES} figures for the beta version.
+                    </Text>
+                    <Text style={styles.limitModalSubMessage}>
+                        Upgrade to premium for unlimited tracking.
+                    </Text>
+                    <Text style={styles.limitModalComingSoon}>
+                        Coming soon! ✨
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.limitModalButton}
+                        onPress={() => setShowLimitModal(false)}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.limitModalButtonText}>Got it!</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
             <View style={styles.headerRow}>
@@ -250,6 +283,7 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                 </TouchableOpacity>
             </View>
             <View style={styles.statsBox}>
+                <Text style={styles.stat}>Collection: <Text style={styles.statValue}>{ownedCount}/{COLLECTION_LIMITS.BETA_MAX_FIGURES}</Text> figures</Text>
                 <Text style={styles.stat}>Owned: <Text style={styles.statValue}>{ownedCount}</Text> figures</Text>
                 <Text style={styles.stat}>Wishlist: <Text style={styles.statValue}>{wishlistCount}</Text> figures</Text>
                 <Text style={styles.stat}>Collection Value: <Text style={styles.statValue}>${collectionValue}</Text></Text>
@@ -291,6 +325,7 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                 onPhotoSelected={handlePhotoSelected}
                 onClose={handlePhotoPickerClose}
             />
+            <CollectionLimitModal />
         </SafeAreaView>
     );
 }
@@ -537,5 +572,69 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         marginTop: spacing.xs,
         fontWeight: '600',
+    },
+    // Collection Limit Modal Styles
+    limitModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: spacing.lg,
+    },
+    limitModalBox: {
+        backgroundColor: colors.card,
+        borderRadius: 24,
+        padding: spacing.xl,
+        alignItems: 'center',
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+        elevation: 10,
+        width: '100%',
+        maxWidth: 320,
+    },
+    limitModalTitle: {
+        fontSize: fontSizes.lg,
+        fontWeight: 'bold',
+        color: colors.primary,
+        marginBottom: spacing.md,
+        textAlign: 'center',
+    },
+    limitModalMessage: {
+        fontSize: fontSizes.md,
+        color: colors.text,
+        marginBottom: spacing.sm,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+    limitModalSubMessage: {
+        fontSize: fontSizes.sm,
+        color: colors.textSecondary,
+        marginBottom: spacing.xs,
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    limitModalComingSoon: {
+        fontSize: fontSizes.sm,
+        color: colors.accent,
+        marginBottom: spacing.lg,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    limitModalButton: {
+        backgroundColor: colors.primary,
+        borderRadius: 16,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.xl,
+        alignItems: 'center',
+        width: '100%',
+        ...shadows.card,
+    },
+    limitModalButtonText: {
+        color: colors.card,
+        fontSize: fontSizes.md,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
 }); 

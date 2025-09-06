@@ -12,7 +12,7 @@ import BrowseFiguresScreen from './BrowseFiguresScreen';
 import CollectionScreen from './CollectionScreen';
 import LabubuList from './LabubuList';
 import { CollectionService, CollectionItem } from './collectionService';
-import { colors, spacing, fontSizes, gradients, shadows } from './designSystem';
+import { colors, spacing, fontSizes, gradients, shadows, COLLECTION_LIMITS } from './designSystem';
 const labubupink = require('./assets/labubupink.png');
 
 let Haptics: any = { selectionAsync: () => { } };
@@ -208,6 +208,12 @@ export default function App() {
 
   const [collectionItems, setCollectionItems] = useState<CollectionItem[]>([]);
 
+  // Check if collection limit is reached
+  const isCollectionLimitReached = useCallback(() => {
+    const ownedCount = owned.length;
+    return ownedCount >= COLLECTION_LIMITS.BETA_MAX_FIGURES;
+  }, [owned]);
+
   // Save collection to Firebase Firestore (with local backup)
   const saveCollection = async (items: CollectionItem[]) => {
     try {
@@ -293,6 +299,16 @@ export default function App() {
 
   const addToOwned = useCallback((id: string) => {
     if (!owned.includes(id)) {
+      // Check if collection limit is reached
+      if (isCollectionLimitReached()) {
+        Alert.alert(
+          'Beta Collection Limit Reached! 🚫',
+          `You've reached the maximum of ${COLLECTION_LIMITS.BETA_MAX_FIGURES} figures for the beta version.\n\nUpgrade to premium for unlimited tracking.\n\nComing soon! ✨`,
+          [{ text: 'Got it!', style: 'default' }]
+        );
+        return;
+      }
+
       setOwned([...owned, id]);
       setWishlist(wishlist.filter(fid => fid !== id));
 
@@ -309,7 +325,7 @@ export default function App() {
 
       Alert.alert('Added to Owned!');
     }
-  }, [owned, wishlist, collectionItems]);
+  }, [owned, wishlist, collectionItems, isCollectionLimitReached]);
   const addToWishlist = useCallback((id: string) => {
     if (!wishlist.includes(id) && !owned.includes(id)) {
       setWishlist([...wishlist, id]);
@@ -331,6 +347,16 @@ export default function App() {
 
   const moveToOwned = useCallback((id: string) => {
     if (!owned.includes(id)) {
+      // Check if collection limit is reached
+      if (isCollectionLimitReached()) {
+        Alert.alert(
+          'Beta Collection Limit Reached! 🚫',
+          `You've reached the maximum of ${COLLECTION_LIMITS.BETA_MAX_FIGURES} figures for the beta version.\n\nUpgrade to premium for unlimited tracking.\n\nComing soon! ✨`,
+          [{ text: 'Got it!', style: 'default' }]
+        );
+        return;
+      }
+
       setOwned([...owned, id]);
       setWishlist(wishlist.filter(fid => fid !== id));
 
@@ -342,7 +368,7 @@ export default function App() {
 
       Alert.alert('Moved to Owned!');
     }
-  }, [owned, wishlist, collectionItems]);
+  }, [owned, wishlist, collectionItems, isCollectionLimitReached]);
   const moveToWishlist = useCallback((id: string) => {
     if (!wishlist.includes(id)) {
       setWishlist([...wishlist, id]);
