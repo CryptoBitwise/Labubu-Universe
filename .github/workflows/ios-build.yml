@@ -16,12 +16,16 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'  # Updated to match Gemfile (>= 3.1.0)
-          bundler: '2.4.22'  # Latest stable for Ruby 3.2
+          ruby-version: '3.2'  # Matches Gemfile (>= 3.1.0)
+          bundler: '2.4.22'
           bundler-cache: true
 
-      - name: Install Bundler and Cocoapods
+      - name: Cleanup old gems
+        run: gem uninstall bundler -aIx || true
+
+      - name: Update RubyGems and reinstall Bundler
         run: |
+          gem update --system
           gem install bundler -v '2.4.22'
           gem install cocoapods -v '1.15.2'
           gem clean
