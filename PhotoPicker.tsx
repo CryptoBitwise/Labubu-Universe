@@ -8,37 +8,34 @@ import {
     Alert,
     ActivityIndicator,
     Dimensions,
+    PermissionsAndroid,
+    Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, spacing, fontSizes, shadows, gradients } from './designSystem';
 
-// Try to import react-native-image-picker, fallback to placeholder if not available
-let launchImageLibrary: any = null;
-let launchCamera: any = null;
-try {
-    const imagePicker = require('react-native-image-picker');
-    launchImageLibrary = imagePicker.launchImageLibrary;
-    launchCamera = imagePicker.launchCamera;
-} catch (error) {
-    // Package not installed yet, will use placeholder functionality
-    console.log('react-native-image-picker not available, using placeholder functionality');
-}
+import { launchImageLibrary, launchCamera, ImagePickerResponse, MediaType, PhotoQuality } from 'react-native-image-picker';
+import { PhotoUploadService } from './photoUploadService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface PhotoPickerProps {
     visible: boolean;
+    figureId: string;
+    userId: string;
     onPhotoSelected: (photoUri: string) => void;
     onClose: () => void;
 }
 
 const PhotoPicker: React.FC<PhotoPickerProps> = ({
     visible,
+    figureId,
+    userId,
     onPhotoSelected,
     onClose,
 }) => {
     const [loading, setLoading] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Debug logging
     console.log('PhotoPicker render - visible:', visible);
@@ -68,24 +65,203 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
         };
     }, []);
 
-    const handleTakePhoto = () => {
-        Alert.alert(
-            '📸 Camera Feature Coming Soon!',
-            'The camera functionality will be available in a future update. For now, you can use the "Skip" option to continue.',
-            [
-                { text: 'OK', style: 'default' }
-            ]
-        );
+    // Request camera permission
+    const requestCameraPermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                console.log('Requesting camera permission...');
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: 'Camera Permission',
+                        message: 'This app needs access to camera to take photos of your Labubu collection.',
+                        buttonNeutral: 'Ask Me Later',
+                        buttonNegative: 'Cancel',
+                        buttonPositive: 'OK',
+                    }
+                );
+                console.log('Camera permission result:', granted);
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn('Camera permission error:', err);
+                return false;
+            }
+        }
+        return true; // iOS handles this automatically
     };
 
-    const handleChooseFromGallery = () => {
-        Alert.alert(
-            '🖼️ Gallery Feature Coming Soon!',
-            'The gallery functionality will be available in a future update. For now, you can use the "Skip" option to continue.',
-            [
-                { text: 'OK', style: 'default' }
-            ]
-        );
+    // Request storage permission for gallery
+    const requestStoragePermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                console.log('Requesting storage permission...');
+
+                // For Android 13+ (API 33+), we need READ_MEDIA_IMAGES instead
+                const permission = Platform.Version >= 33
+                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+                console.log('Using permission:', permission);
+
+                const granted = await PermissionsAndroid.request(
+                    permission,
+                    {
+                        title: 'Storage Permission',
+                        message: 'This app needs access to your photo library to select photos of your Labubu collection.',
+                        buttonNeutral: 'Ask Me Later',
+                        buttonNegative: 'Cancel',
+                        buttonPositive: 'OK',
+                    }
+                );
+                console.log('Storage permission result:', granted);
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn('Storage permission error:', err);
+                return false;
+            }
+        }
+        return true; // iOS handles this automatically
+    };
+
+    const handleTakePhoto = async () => {
+        setLoading(true);
+
+        // Check camera permission first
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+            setLoading(false);
+            Alert.alert(
+                'Permission Denied',
+                'Camera permission is required to take photos. Please enable it in your device settings.',
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo' as MediaType,
+            quality: 0.8 as PhotoQuality,
+            maxWidth: 1024,
+            maxHeight: 1024,
+            includeBase64: false,
+            saveToPhotos: false,
+            cameraType: 'back',
+        };
+
+        launchCamera(options, async (response: ImagePickerResponse) => {
+            console.log('Camera response:', response);
+
+            if (response.didCancel) {
+                console.log('User cancelled camera');
+                setLoading(false);
+                return;
+            }
+
+            if (response.errorMessage) {
+                console.log('Camera error:', response.errorMessage);
+                Alert.alert('Camera Error', response.errorMessage);
+                setLoading(false);
+                return;
+            }
+
+            if (response.assets && response.assets[0]) {
+                const photoUri = response.assets[0].uri;
+                console.log('Photo captured:', photoUri);
+                if (photoUri) {
+                    try {
+                        // Upload to Firebase Storage
+                        const uploadResult = await PhotoUploadService.uploadPhoto(photoUri, figureId, userId);
+                        if (uploadResult.success && uploadResult.downloadUrl) {
+                            console.log('Photo uploaded successfully:', uploadResult.downloadUrl);
+                            onPhotoSelected(uploadResult.downloadUrl);
+                            onClose();
+                        } else {
+                            console.log('Upload failed:', uploadResult.error);
+                            Alert.alert('Upload Error', uploadResult.error || 'Failed to upload photo');
+                        }
+                    } catch (error) {
+                        console.log('Upload error:', error);
+                        Alert.alert('Upload Error', 'Failed to upload photo');
+                    } finally {
+                        setLoading(false);
+                    }
+                } else {
+                    setLoading(false);
+                }
+            } else {
+                setLoading(false);
+            }
+        });
+    };
+
+    const handleChooseFromGallery = async () => {
+        setLoading(true);
+
+        // Check storage permission first
+        const hasPermission = await requestStoragePermission();
+        if (!hasPermission) {
+            setLoading(false);
+            Alert.alert(
+                'Permission Denied',
+                'Storage permission is required to access your photo library. Please enable it in your device settings.',
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo' as MediaType,
+            quality: 0.8 as PhotoQuality,
+            maxWidth: 1024,
+            maxHeight: 1024,
+            includeBase64: false,
+            selectionLimit: 1,
+        };
+
+        launchImageLibrary(options, async (response: ImagePickerResponse) => {
+            console.log('Gallery response:', response);
+
+            if (response.didCancel) {
+                console.log('User cancelled gallery');
+                setLoading(false);
+                return;
+            }
+
+            if (response.errorMessage) {
+                console.log('Gallery error:', response.errorMessage);
+                Alert.alert('Gallery Error', response.errorMessage);
+                setLoading(false);
+                return;
+            }
+
+            if (response.assets && response.assets[0]) {
+                const photoUri = response.assets[0].uri;
+                console.log('Photo selected:', photoUri);
+                if (photoUri) {
+                    try {
+                        // Upload to Firebase Storage
+                        const uploadResult = await PhotoUploadService.uploadPhoto(photoUri, figureId, userId);
+                        if (uploadResult.success && uploadResult.downloadUrl) {
+                            console.log('Photo uploaded successfully:', uploadResult.downloadUrl);
+                            onPhotoSelected(uploadResult.downloadUrl);
+                            onClose();
+                        } else {
+                            console.log('Upload failed:', uploadResult.error);
+                            Alert.alert('Upload Error', uploadResult.error || 'Failed to upload photo');
+                        }
+                    } catch (error) {
+                        console.log('Upload error:', error);
+                        Alert.alert('Upload Error', 'Failed to upload photo');
+                    } finally {
+                        setLoading(false);
+                    }
+                } else {
+                    setLoading(false);
+                }
+            } else {
+                setLoading(false);
+            }
+        });
     };
 
     const handleSkip = () => {
@@ -124,7 +300,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                         >
                             <Text style={styles.title}>Add Photo to Your Collection</Text>
                             <Text style={styles.subtitle}>
-                                Camera and gallery features coming soon! For now, you can skip to use the default image.
+                                Take a photo with your camera or choose from your gallery to add to your Labubu collection!
                             </Text>
                         </LinearGradient>
 
@@ -146,7 +322,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                                     ) : (
                                         <>
                                             <Text style={styles.buttonIcon}>📸</Text>
-                                            <Text style={styles.buttonText}>Take Photo (Coming Soon)</Text>
+                                            <Text style={styles.buttonText}>Take Photo</Text>
                                         </>
                                     )}
                                 </LinearGradient>
@@ -169,7 +345,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                                     ) : (
                                         <>
                                             <Text style={styles.buttonIcon}>🖼️</Text>
-                                            <Text style={styles.buttonText}>Choose from Gallery (Coming Soon)</Text>
+                                            <Text style={styles.buttonText}>Choose from Gallery</Text>
                                         </>
                                     )}
                                 </LinearGradient>

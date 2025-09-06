@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Animated, Image, Alert } from 'react-native';
 import { ALL_LABUBU_FIGURES } from './labubu_blind_box_data.js';
 import { colors, spacing, fontSizes, shadows } from './designSystem';
-// import PhotoPicker from './PhotoPicker'; // Disabled
+import PhotoPicker from './PhotoPicker';
+import { CollectionService } from './collectionService';
 
 // Collection item type with user photo support
 interface CollectionItem {
@@ -64,6 +65,8 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
 }) {
     const [tab, setTab] = useState<'owned' | 'wishlist'>('owned');
     const [loading, setLoading] = useState(true);
+    const [showPhotoPicker, setShowPhotoPicker] = useState(false);
+    const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null);
     const ownedFigures = ALL_LABUBU_FIGURES.filter(f => owned.includes(f.id.toString()));
     const wishlistFigures = ALL_LABUBU_FIGURES.filter(f => wishlist.includes(f.id.toString()));
     const ownedCount = ownedFigures.length;
@@ -77,19 +80,13 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
 
     const handleUpdatePhoto = (figureId: string) => {
         console.log('CollectionScreen handleUpdatePhoto called with:', figureId);
-        // Show coming soon alert instead of photo picker
-        Alert.alert(
-            'Photo Feature Coming Soon! 📸',
-            'You\'ll be able to add photos of your Labubu collection in a future update! ✨',
-            [{ text: 'OK', style: 'default' }]
-        );
+        setSelectedFigureId(figureId);
+        setShowPhotoPicker(true);
     };
 
-    // Photo functionality temporarily disabled
     const handlePhotoSelected = (photoUri: string) => {
-        // Photo functionality disabled
-        if (false) { // selectedFigure) {
-            const existingItemIndex = collectionItems.findIndex(item => item.figureId === '');
+        if (selectedFigureId) {
+            const existingItemIndex = collectionItems.findIndex(item => item.figureId === selectedFigureId);
 
             if (existingItemIndex >= 0) {
                 // Update existing collection item
@@ -102,7 +99,7 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
             } else {
                 // Create new collection item
                 const newItem: CollectionItem = {
-                    figureId: '', // selectedFigure,
+                    figureId: selectedFigureId,
                     owned: true,
                     wishlist: false,
                     userPhoto: photoUri !== 'skip' ? photoUri : undefined,
@@ -111,11 +108,13 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                 onUpdateCollectionItems([...collectionItems, newItem]);
             }
         }
-        // Photo functionality disabled
+        setShowPhotoPicker(false);
+        setSelectedFigureId(null);
     };
 
     const handlePhotoPickerClose = () => {
-        // Photo functionality disabled
+        setShowPhotoPicker(false);
+        setSelectedFigureId(null);
     };
 
     const renderFigure = (item: any, inOwned: boolean) => {
@@ -285,12 +284,13 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
             <TouchableOpacity style={styles.browseButton} onPress={onBrowse}>
                 <Text style={styles.browseButtonText}>Browse Figures to Add</Text>
             </TouchableOpacity>
-            {/* Photo picker modal - Disabled */}
-            {/* <PhotoPicker
-                visible={false}
+            <PhotoPicker
+                visible={showPhotoPicker}
+                figureId={selectedFigureId || ''}
+                userId={CollectionService.getUserId()}
                 onPhotoSelected={handlePhotoSelected}
                 onClose={handlePhotoPickerClose}
-            /> */}
+            />
         </SafeAreaView>
     );
 }

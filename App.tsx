@@ -32,15 +32,7 @@ const LORE_TIPS = [
 
 const SPLASH_DURATION = 3500;
 
-// Collection item type with user photo support
-interface CollectionItem {
-  figureId: string;
-  owned: boolean;
-  wishlist: boolean;
-  userPhoto?: string;
-  dateAdded?: string;
-  notes?: string;
-}
+// CollectionItem interface is imported from collectionService.ts
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [fadeIn] = useState(new Animated.Value(0));
@@ -258,9 +250,9 @@ export default function App() {
       const loadedWishlist: string[] = [];
 
       safeItems.forEach(item => {
-        if (item.status === 'owned') {
+        if (item.owned) {
           loadedOwned.push(item.figureId);
-        } else if (item.status === 'wishlist') {
+        } else if (item.wishlist) {
           loadedWishlist.push(item.figureId);
         }
       });
@@ -307,8 +299,9 @@ export default function App() {
       // Update collectionItems for Firebase persistence
       const newItem: CollectionItem = {
         figureId: id,
-        status: 'owned',
-        addedAt: new Date().toISOString()
+        owned: true,
+        wishlist: false,
+        dateAdded: new Date().toISOString()
       };
       const updatedCollection = collectionItems.filter(item => item.figureId !== id);
       updatedCollection.push(newItem);
@@ -324,8 +317,9 @@ export default function App() {
       // Update collectionItems for Firebase persistence
       const newItem: CollectionItem = {
         figureId: id,
-        status: 'wishlist',
-        addedAt: new Date().toISOString()
+        owned: false,
+        wishlist: true,
+        dateAdded: new Date().toISOString()
       };
       const updatedCollection = collectionItems.filter(item => item.figureId !== id);
       updatedCollection.push(newItem);
@@ -342,7 +336,7 @@ export default function App() {
 
       // Update collectionItems for Firebase persistence
       const updatedCollection = collectionItems.map(item =>
-        item.figureId === id ? { ...item, status: 'owned' } : item
+        item.figureId === id ? { ...item, owned: true, wishlist: false } : item
       );
       setCollectionItems(updatedCollection);
 
@@ -356,7 +350,7 @@ export default function App() {
 
       // Update collectionItems for Firebase persistence
       const updatedCollection = collectionItems.map(item =>
-        item.figureId === id ? { ...item, status: 'wishlist' } : item
+        item.figureId === id ? { ...item, owned: false, wishlist: true } : item
       );
       setCollectionItems(updatedCollection);
 

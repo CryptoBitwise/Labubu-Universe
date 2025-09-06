@@ -54,7 +54,7 @@ export class CollectionService {
                 .doc(userId)
                 .get();
 
-            if (doc.exists) {
+            if (doc.exists()) {
                 const data = doc.data();
                 if (data && data.items) {
                     return data.items;
