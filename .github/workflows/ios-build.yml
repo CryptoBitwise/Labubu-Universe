@@ -30,13 +30,16 @@ jobs:
     - name: Install dependencies
       run: npm install
       
+    - name: Update RubyGems
+      run: gem update --system
+      
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
+        echo "Removing old Gemfile.lock to avoid conflicts..."
+        rm -f Gemfile.lock
         echo "Installing gems with bundler..."
         bundle install --verbose
-        echo "Updating gems..."
-        bundle update
         echo "Updating pod repo..."
         bundle exec pod repo update
         echo "Installing pods..."
