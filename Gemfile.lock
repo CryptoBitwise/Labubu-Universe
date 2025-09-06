@@ -51,6 +51,8 @@ GEM
     minitest (5.22.2)
     mutex_m (0.2.0)
     rexml (3.3.2)
+      strscan (>= 0)
+    strscan (3.0.7)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     xcodeproj (1.25.0)
