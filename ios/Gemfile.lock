@@ -21,8 +21,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 2.5.21)
+  bundler (~> 2.3.26)
   cocoapods (~> 1.16)
 
 BUNDLED WITH
-   2.5.21
+   2.3.26
