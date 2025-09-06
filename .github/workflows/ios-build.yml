@@ -42,6 +42,9 @@ jobs:
         export LDFLAGS="-L$(brew --prefix libffi)/lib"
         export CPPFLAGS="-I$(brew --prefix libffi)/include"
         
+    - name: Install CocoaPods
+      run: gem install cocoapods -v '~> 1.15'
+        
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
