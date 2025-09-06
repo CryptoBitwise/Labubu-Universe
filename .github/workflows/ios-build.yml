@@ -16,13 +16,13 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7'
-          bundler: '2.3.26'
+          ruby-version: '3.2'  # Updated to match Gemfile (>= 3.1.0)
+          bundler: '2.4.22'  # Latest stable for Ruby 3.2
           bundler-cache: true
 
       - name: Install Bundler and Cocoapods
         run: |
-          gem install bundler -v '2.3.26'
+          gem install bundler -v '2.4.22'
           gem install cocoapods -v '1.15.2'
           gem clean
 
@@ -39,10 +39,10 @@ jobs:
       - name: Build iOS
         run: |
           cd ios
-          xcodebuild -workspace LabubuUniverse.xcworkspace -scheme LabubuUniverse -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' clean build
+          xcodebuild -workspace LabubuApp.xcworkspace -scheme LabubuApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' clean build
 
       - name: Upload iOS Build
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: ios/build/LabubuUniverse.xcarchive
+          path: ios/build/LabubuApp.xcarchive
