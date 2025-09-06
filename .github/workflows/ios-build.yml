@@ -33,12 +33,19 @@ jobs:
     - name: Update RubyGems
       run: gem update --system
       
+    - name: Clean old bundler environments
+      run: gem uninstall bundler -aIx || true
+      
     - name: Install Bundler 2.5.21
       run: gem install bundler -v 2.5.21
       
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
+        echo "Checking Ruby version..."
+        ruby --version
+        echo "Checking bundler version..."
+        bundle _2.5.21_ --version
         echo "Installing gems with bundler 2.5.21..."
         bundle _2.5.21_ install --verbose
         echo "Updating pod repo..."
