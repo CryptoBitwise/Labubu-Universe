@@ -32,9 +32,15 @@ jobs:
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
+        echo "Installing bundler..."
         gem install bundler
+        echo "Installing gems..."
         bundle install --verbose
+        echo "Updating gems..."
+        bundle update
+        echo "Updating pod repo..."
         bundle exec pod repo update
+        echo "Installing pods..."
         bundle exec pod install --verbose --no-repo-update
         
     - name: Build iOS app
