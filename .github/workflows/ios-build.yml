@@ -57,7 +57,7 @@ jobs:
         echo "Cleaning old gems..."
         bundle _2.3.26_ clean --force
         echo "Installing gems with bundler..."
-        bundle _2.3.26_ install --verbose || (cat Gemfile.lock && exit 1)
+        bundle _2.3.26_ install --verbose --full-index || (cat Gemfile.lock && exit 1)
         echo "Updating pod repo..."
         bundle _2.3.26_ exec pod repo update
         echo "Installing pods..."
