@@ -33,17 +33,20 @@ jobs:
     - name: Update RubyGems
       run: gem update --system
       
+    - name: Install Bundler 2.5.21
+      run: gem install bundler -v 2.5.21
+      
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
         echo "Removing old Gemfile.lock to avoid conflicts..."
         rm -f Gemfile.lock
-        echo "Installing gems with bundler..."
-        bundle install --verbose
+        echo "Installing gems with bundler 2.5.21..."
+        bundle _2.5.21_ install --verbose
         echo "Updating pod repo..."
-        bundle exec pod repo update
+        bundle _2.5.21_ exec pod repo update
         echo "Installing pods..."
-        bundle exec pod install --verbose --no-repo-update
+        bundle _2.5.21_ exec pod install --verbose --no-repo-update
         
     - name: Build iOS app
       run: |
