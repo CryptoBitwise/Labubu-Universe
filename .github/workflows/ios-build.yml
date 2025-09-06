@@ -25,6 +25,7 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 3.2
+        bundler-cache: false
         
     - name: Install dependencies
       run: npm install
@@ -32,9 +33,7 @@ jobs:
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
-        echo "Installing bundler..."
-        gem install bundler
-        echo "Installing gems..."
+        echo "Installing gems with bundler..."
         bundle install --verbose
         echo "Updating gems..."
         bundle update
