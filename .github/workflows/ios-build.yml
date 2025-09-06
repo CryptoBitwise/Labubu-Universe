@@ -1,80 +1,48 @@
-name: iOS Build for TestFlight
-
+name: iOS Build
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [main]
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '16.2'
-      
-    - name: Set up Ruby 3.2
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-        bundler: '2.3.26'
-        bundler-cache: true
-        
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Install System Dependencies
-      run: |
-        brew install libffi
-        export LDFLAGS="-L$(brew --prefix libffi)/lib"
-        export CPPFLAGS="-I$(brew --prefix libffi)/include"
-        
-    - name: Install CocoaPods
-      run: gem install cocoapods -v '~> 1.15'
-        
-    - name: Install Bundler & CocoaPods
-      run: |
-        cd ios
-        echo "Checking Ruby version..."
-        ruby --version
-        echo "Installing correct Bundler version..."
-        gem install bundler:2.3.26
-        echo "Checking bundler version..."
-        bundle _2.3.26_ --version
-        echo "Cleaning old gems..."
-        bundle _2.3.26_ clean --force
-        echo "Installing gems with bundler..."
-        bundle _2.3.26_ install --verbose --full-index || (cat Gemfile.lock && exit 1)
-        echo "Updating pod repo..."
-        bundle _2.3.26_ exec pod repo update
-        echo "Installing pods..."
-        bundle _2.3.26_ exec pod install --verbose --no-repo-update
-        
-    - name: Build iOS app
-      run: |
-        cd ios
-        xcodebuild -workspace LabubuUniverse.xcworkspace \
-                   -scheme LabubuUniverse \
-                   -configuration Release \
-                   -sdk iphonesimulator \
-                   -destination 'platform=iOS Simulator,name=iPhone 15' \
-                   clean build
-                   
-    - name: Upload iOS Build
-      uses: actions/upload-artifact@v4
-      with:
-        name: LabubuUniverse-iOS
-        path: ios/build/
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7'
+          bundler: '2.3.26'
+          bundler-cache: true
+
+      - name: Install Bundler and Cocoapods
+        run: |
+          gem install bundler -v '2.3.26'
+          gem install cocoapods -v '1.15.2'
+          gem clean
+
+      - name: Install Dependencies
+        run: |
+          cd ios
+          bundle clean --force
+          bundle install --verbose || (cat Gemfile.lock && exit 1)
+          bundle exec pod install --verbose --no-repo-update
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Build iOS
+        run: |
+          cd ios
+          xcodebuild -workspace LabubuUniverse.xcworkspace -scheme LabubuUniverse -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15' clean build
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios/build/LabubuUniverse.xcarchive
