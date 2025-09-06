@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    cocoapods (1.16.2)
+    cocoapods (1.15.2)
       activesupport (>= 5.0, < 8)
       addressable (~> 2.8)
       algoliasearch (~> 1.0)
@@ -22,7 +22,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.3.26)
-  cocoapods (~> 1.16)
+  cocoapods (~> 1.15)
 
 BUNDLED WITH
    2.3.26

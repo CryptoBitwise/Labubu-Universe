@@ -3,4 +3,4 @@ source 'https://rubygems.org'
 ruby '2.7.0'
 
 gem 'bundler', '~> 2.3.26'
-gem 'cocoapods', '~> 1.16'
+gem 'cocoapods', '~> 1.15'
