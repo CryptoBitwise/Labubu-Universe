@@ -17,6 +17,7 @@ GEM
       xcodeproj (~> 1.24.0)
 
 PLATFORMS
+  aarch64-darwin-22
   ruby
 
 DEPENDENCIES

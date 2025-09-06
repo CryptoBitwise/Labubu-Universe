@@ -21,15 +21,25 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
+      
     - name: Set up Ruby 3.2
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.2
+        ruby-version: '3.2'
+        bundler: '2.5.21'
         bundler-cache: true
         
     - name: Install dependencies
       run: npm install
       
+    - name: Install System Dependencies
+      run: |
+        brew install libffi
+        export LDFLAGS="-L$(brew --prefix libffi)/lib"
+        export CPPFLAGS="-I$(brew --prefix libffi)/include"
+        
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
@@ -37,8 +47,10 @@ jobs:
         ruby --version
         echo "Checking bundler version..."
         bundle --version
+        echo "Cleaning old gems..."
+        bundle clean --force
         echo "Installing gems with bundler..."
-        bundle install --verbose
+        bundle install --verbose || (cat Gemfile.lock && exit 1)
         echo "Updating pod repo..."
         bundle exec pod repo update
         echo "Installing pods..."
