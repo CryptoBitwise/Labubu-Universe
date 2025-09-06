@@ -32,12 +32,10 @@ target 'LabubuUniverse' do
       # :ccache_enabled => true
     )
     
-    # Fix Firebase module map issues for Swift integration
+    # Fix module map issues for all pods (required for Firebase Swift integration)
     installer.pods_project.targets.each do |target|
-      if ['FirebaseCore', 'FirebaseCoreExtension', 'FirebaseFirestoreInternal', 'FirebaseAppCheckInterop', 'FirebaseAuthInterop', 'GoogleUtilities'].include? target.name
-        target.build_configurations.each do |config|
-          config.build_settings['DEFINES_MODULE'] = 'YES'
-        end
+      target.build_configurations.each do |config|
+        config.build_settings['DEFINES_MODULE'] = 'YES'
       end
     end
   end
