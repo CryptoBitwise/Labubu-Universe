@@ -50,16 +50,18 @@ jobs:
         cd ios
         echo "Checking Ruby version..."
         ruby --version
+        echo "Installing correct Bundler version..."
+        gem install bundler:2.3.26
         echo "Checking bundler version..."
-        bundle --version
+        bundle _2.3.26_ --version
         echo "Cleaning old gems..."
-        bundle clean --force
+        bundle _2.3.26_ clean --force
         echo "Installing gems with bundler..."
-        bundle install --verbose || (cat Gemfile.lock && exit 1)
+        bundle _2.3.26_ install --verbose || (cat Gemfile.lock && exit 1)
         echo "Updating pod repo..."
-        bundle exec pod repo update
+        bundle _2.3.26_ exec pod repo update
         echo "Installing pods..."
-        bundle exec pod install --verbose --no-repo-update
+        bundle _2.3.26_ exec pod install --verbose --no-repo-update
         
     - name: Build iOS app
       run: |
