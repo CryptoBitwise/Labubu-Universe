@@ -39,8 +39,6 @@ jobs:
     - name: Install Bundler & CocoaPods
       run: |
         cd ios
-        echo "Removing old Gemfile.lock to avoid conflicts..."
-        rm -f Gemfile.lock
         echo "Installing gems with bundler 2.5.21..."
         bundle _2.5.21_ install --verbose
         echo "Updating pod repo..."
