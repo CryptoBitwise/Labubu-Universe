@@ -21,15 +21,21 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
+    - name: Set up Ruby 3.2
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.2
+        
     - name: Install dependencies
       run: npm install
       
-    - name: Install CocoaPods
+    - name: Install Bundler & CocoaPods
       run: |
-        sudo gem install cocoapods
+        gem install bundler
         cd ios
-        pod repo update
-        pod install --verbose --no-repo-update
+        bundle install
+        bundle exec pod repo update
+        bundle exec pod install --verbose --no-repo-update
         
     - name: Build iOS app
       run: |
