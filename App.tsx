@@ -217,13 +217,11 @@ export default function App() {
   // Save collection to Firebase Firestore (with local backup)
   const saveCollection = async (items: CollectionItem[]) => {
     try {
-      const userId = CollectionService.getUserId();
-
       // Save to local storage first (immediate)
       await CollectionService.syncWithLocalStorage(items);
 
       // Then save to Firebase Firestore (async)
-      const firestoreSuccess = await CollectionService.saveCollection(userId, items);
+      const firestoreSuccess = await CollectionService.saveCollection(items);
       
       console.log('Collection saved successfully:', items.length, 'items');
     } catch (error) {
@@ -234,10 +232,8 @@ export default function App() {
   // Load collection from Firebase Firestore (with local fallback)
   const loadCollection = async () => {
     try {
-      const userId = CollectionService.getUserId();
-
       // Try to load from Firebase first
-      let items = await CollectionService.loadCollection(userId);
+      let items = await CollectionService.loadCollection();
 
       // If Firebase is empty or failed, try local storage as fallback
       if (!items || items.length === 0) {
@@ -245,7 +241,7 @@ export default function App() {
 
         // If we found items in local storage, sync them to Firebase
         if (items && items.length > 0) {
-          await CollectionService.saveCollection(userId, items);
+          await CollectionService.saveCollection(items);
         }
       }
 

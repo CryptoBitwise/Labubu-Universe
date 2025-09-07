@@ -23,7 +23,8 @@ export class CollectionService {
      * @param userId - Unique user identifier
      * @param items - Array of collection items
      */
-    static async saveCollection(userId: string, items: CollectionItem[]): Promise<boolean> {
+    static async saveCollection(items: CollectionItem[]): Promise<boolean> {
+        const userId = await this.getUserId();
         try {
             const userCollection: UserCollection = {
                 userId,
@@ -47,7 +48,8 @@ export class CollectionService {
      * Load user's collection from Firestore
      * @param userId - Unique user identifier
      */
-    static async loadCollection(userId: string): Promise<CollectionItem[]> {
+    static async loadCollection(): Promise<CollectionItem[]> {
+        const userId = await this.getUserId();
         try {
             const doc = await firestore()
                 .collection(this.COLLECTION_NAME)
@@ -75,9 +77,9 @@ export class CollectionService {
      * @param userId - Unique user identifier
      * @param item - Collection item to add
      */
-    static async addItem(userId: string, item: CollectionItem): Promise<boolean> {
+    static async addItem(item: CollectionItem): Promise<boolean> {
         try {
-            const currentItems = await this.loadCollection(userId);
+            const currentItems = await this.loadCollection();
             const existingIndex = currentItems.findIndex(i => i.figureId === item.figureId);
 
             if (existingIndex >= 0) {
@@ -88,7 +90,7 @@ export class CollectionService {
                 currentItems.push(item);
             }
 
-            return await this.saveCollection(userId, currentItems);
+            return await this.saveCollection(currentItems);
         } catch (error) {
             console.error('❌ Error adding item to collection:', error);
             return false;
@@ -100,12 +102,12 @@ export class CollectionService {
      * @param userId - Unique user identifier
      * @param figureId - ID of the figure to remove
      */
-    static async removeItem(userId: string, figureId: string): Promise<boolean> {
+    static async removeItem(figureId: string): Promise<boolean> {
         try {
-            const currentItems = await this.loadCollection(userId);
+            const currentItems = await this.loadCollection();
             const filteredItems = currentItems.filter(item => item.figureId !== figureId);
 
-            return await this.saveCollection(userId, filteredItems);
+            return await this.saveCollection(filteredItems);
         } catch (error) {
             console.error('❌ Error removing item from collection:', error);
             return false;
@@ -113,13 +115,26 @@ export class CollectionService {
     }
 
     /**
-     * Get a simple user ID (for demo purposes)
-     * In a real app, this would come from authentication
+     * Get a unique user ID based on device
+     * Each device gets its own collection
      */
-    static getUserId(): string {
-        // For now, use a simple demo user ID
-        // In production, this would come from Firebase Auth
-        return 'demo-user-123';
+    static async getUserId(): Promise<string> {
+        try {
+            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+            let userId = await AsyncStorage.getItem('labubu_user_id');
+            
+            if (!userId) {
+                // Generate a unique ID for this device
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                await AsyncStorage.setItem('labubu_user_id', userId);
+            }
+            
+            return userId;
+        } catch (error) {
+            console.error('Error getting user ID:', error);
+            // Fallback to timestamp-based ID
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
     }
 
     /**
