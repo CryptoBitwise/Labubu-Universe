@@ -123,10 +123,17 @@ export class CollectionService {
             const AsyncStorage = require('@react-native-async-storage/async-storage').default;
             let userId = await AsyncStorage.getItem('labubu_user_id');
             
-            if (!userId) {
+            // Check if this is the old shared user ID and force a new one
+            if (userId === 'demo-user-123' || !userId) {
+                // Clear any old shared data
+                await AsyncStorage.removeItem('labubuCollection');
+                await AsyncStorage.removeItem('labubu_user_id');
+                
                 // Generate a unique ID for this device
                 userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 await AsyncStorage.setItem('labubu_user_id', userId);
+                
+                console.log('Generated new unique user ID:', userId);
             }
             
             return userId;
@@ -156,6 +163,19 @@ export class CollectionService {
     static async loadFromLocalStorage(): Promise<CollectionItem[]> {
         try {
             const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+            
+            // Check app version to clear old shared data
+            const currentVersion = '2.0.0'; // New version with unique user IDs
+            const storedVersion = await AsyncStorage.getItem('labubu_app_version');
+            
+            if (storedVersion !== currentVersion) {
+                // Clear old shared data and update version
+                await AsyncStorage.removeItem('labubuCollection');
+                await AsyncStorage.setItem('labubu_app_version', currentVersion);
+                console.log('Cleared old shared data for new version');
+                return [];
+            }
+            
             const savedCollection = await AsyncStorage.getItem('labubuCollection');
             if (savedCollection) {
                 const items = JSON.parse(savedCollection);
