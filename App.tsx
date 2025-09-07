@@ -219,11 +219,13 @@ export default function App() {
     try {
       const userId = CollectionService.getUserId();
 
-      // Save to Firebase Firestore
-      const firestoreSuccess = await CollectionService.saveCollection(userId, items);
-
-      // Also save to local storage as backup
+      // Save to local storage first (immediate)
       await CollectionService.syncWithLocalStorage(items);
+
+      // Then save to Firebase Firestore (async)
+      const firestoreSuccess = await CollectionService.saveCollection(userId, items);
+      
+      console.log('Collection saved successfully:', items.length, 'items');
     } catch (error) {
       console.error('Error saving collection:', error);
     }
@@ -282,7 +284,14 @@ export default function App() {
     loadCollection();
   }, []);
 
-  // Save collection when app goes to background
+  // Save collection whenever it changes (immediate save)
+  useEffect(() => {
+    if (collectionItems.length > 0) {
+      saveCollection(collectionItems);
+    }
+  }, [collectionItems]);
+
+  // Also save collection when app goes to background (backup)
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'background' || nextAppState === 'inactive') {
