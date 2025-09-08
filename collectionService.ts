@@ -19,6 +19,24 @@ export class CollectionService {
     private static readonly COLLECTION_NAME = 'userCollections';
 
     /**
+     * Clean collection items by removing undefined values (Firebase doesn't support undefined)
+     */
+    private static cleanCollectionItems(items: CollectionItem[]): CollectionItem[] {
+        return items.map(item => {
+            const cleanedItem: any = { ...item };
+
+            // Remove undefined values
+            Object.keys(cleanedItem).forEach(key => {
+                if (cleanedItem[key] === undefined) {
+                    delete cleanedItem[key];
+                }
+            });
+
+            return cleanedItem as CollectionItem;
+        });
+    }
+
+    /**
      * Save user's collection to Firestore
      * @param userId - Unique user identifier
      * @param items - Array of collection items
@@ -26,9 +44,12 @@ export class CollectionService {
     static async saveCollection(items: CollectionItem[]): Promise<boolean> {
         const userId = await this.getUserId();
         try {
+            // Clean items to remove undefined values
+            const cleanedItems = this.cleanCollectionItems(items);
+
             const userCollection: UserCollection = {
                 userId,
-                items,
+                items: cleanedItems,
                 lastUpdated: new Date().toISOString()
             };
 
@@ -122,20 +143,20 @@ export class CollectionService {
         try {
             const AsyncStorage = require('@react-native-async-storage/async-storage').default;
             let userId = await AsyncStorage.getItem('labubu_user_id');
-            
+
             // Check if this is the old shared user ID and force a new one
             if (userId === 'demo-user-123' || !userId) {
                 // Clear any old shared data
                 await AsyncStorage.removeItem('labubuCollection');
                 await AsyncStorage.removeItem('labubu_user_id');
-                
+
                 // Generate a unique ID for this device
                 userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 await AsyncStorage.setItem('labubu_user_id', userId);
-                
+
                 console.log('Generated new unique user ID:', userId);
             }
-            
+
             return userId;
         } catch (error) {
             console.error('Error getting user ID:', error);
@@ -163,11 +184,11 @@ export class CollectionService {
     static async loadFromLocalStorage(): Promise<CollectionItem[]> {
         try {
             const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-            
+
             // Check app version to clear old shared data
             const currentVersion = '2.0.0'; // New version with unique user IDs
             const storedVersion = await AsyncStorage.getItem('labubu_app_version');
-            
+
             if (storedVersion !== currentVersion) {
                 // Clear old shared data and update version
                 await AsyncStorage.removeItem('labubuCollection');
@@ -175,7 +196,7 @@ export class CollectionService {
                 console.log('Cleared old shared data for new version');
                 return [];
             }
-            
+
             const savedCollection = await AsyncStorage.getItem('labubuCollection');
             if (savedCollection) {
                 const items = JSON.parse(savedCollection);

@@ -72,8 +72,35 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [showAchievements, setShowAchievements] = useState(false);
-    const ownedFigures = ALL_LABUBU_FIGURES.filter(f => owned.includes(f.id.toString()));
-    const wishlistFigures = ALL_LABUBU_FIGURES.filter(f => wishlist.includes(f.id.toString()));
+    const [sortBy, setSortBy] = useState<'series' | 'name' | 'rarity' | 'date'>('series');
+    // Sort figures based on selected sort option
+    const sortFigures = (figures: any[]) => {
+        return figures.sort((a, b) => {
+            switch (sortBy) {
+                case 'series':
+                    return a.series.localeCompare(b.series) || a.name.localeCompare(b.name);
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'rarity':
+                    const rarityOrder = ['Common', 'Uncommon', 'Rare', 'Very Rare', 'Ultra Rare', 'Secret'];
+                    const aRarityIndex = rarityOrder.indexOf(a.rarity);
+                    const bRarityIndex = rarityOrder.indexOf(b.rarity);
+                    return aRarityIndex - bRarityIndex || a.name.localeCompare(b.name);
+                case 'date':
+                    // Sort by date added (most recent first)
+                    const aItem = collectionItems.find(item => item.figureId === a.id.toString());
+                    const bItem = collectionItems.find(item => item.figureId === b.id.toString());
+                    const aDate = aItem?.dateAdded || '';
+                    const bDate = bItem?.dateAdded || '';
+                    return bDate.localeCompare(aDate);
+                default:
+                    return 0;
+            }
+        });
+    };
+
+    const ownedFigures = sortFigures(ALL_LABUBU_FIGURES.filter(f => owned.includes(f.id.toString())));
+    const wishlistFigures = sortFigures(ALL_LABUBU_FIGURES.filter(f => wishlist.includes(f.id.toString())));
     const ownedCount = ownedFigures.length;
     const wishlistCount = wishlistFigures.length;
     const collectionValue = ownedFigures.reduce((sum, f) => sum + f.estimatedValue.max, 0);
@@ -90,27 +117,37 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
     };
 
     const handlePhotoSelected = (photoUri: string) => {
-        if (selectedFigureId) {
-            const existingItemIndex = collectionItems.findIndex(item => item.figureId === selectedFigureId);
+        console.log('CollectionScreen handlePhotoSelected called with:', photoUri, 'for figure:', selectedFigureId);
 
-            if (existingItemIndex >= 0) {
-                // Update existing collection item
-                const updatedItems = [...collectionItems];
-                updatedItems[existingItemIndex] = {
-                    ...updatedItems[existingItemIndex],
-                    userPhoto: photoUri !== 'skip' ? photoUri : undefined,
-                };
-                onUpdateCollectionItems(updatedItems);
-            } else {
-                // Create new collection item
-                const newItem: CollectionItem = {
-                    figureId: selectedFigureId,
-                    owned: true,
-                    wishlist: false,
-                    userPhoto: photoUri !== 'skip' ? photoUri : undefined,
-                    dateAdded: new Date().toISOString(),
-                };
-                onUpdateCollectionItems([...collectionItems, newItem]);
+        if (selectedFigureId) {
+            try {
+                const existingItemIndex = collectionItems.findIndex(item => item.figureId === selectedFigureId);
+
+                if (existingItemIndex >= 0) {
+                    // Update existing collection item
+                    const updatedItems = [...collectionItems];
+                    updatedItems[existingItemIndex] = {
+                        ...updatedItems[existingItemIndex],
+                        userPhoto: photoUri !== 'skip' ? photoUri : undefined,
+                    };
+                    console.log('Updating existing item:', updatedItems[existingItemIndex]);
+                    onUpdateCollectionItems(updatedItems);
+                } else {
+                    // Create new collection item
+                    const newItem: CollectionItem = {
+                        figureId: selectedFigureId,
+                        owned: true,
+                        wishlist: false,
+                        userPhoto: photoUri !== 'skip' ? photoUri : undefined,
+                        dateAdded: new Date().toISOString(),
+                    };
+                    const updatedItems = [...collectionItems, newItem];
+                    console.log('Creating new item:', newItem);
+                    onUpdateCollectionItems(updatedItems);
+                }
+            } catch (error) {
+                console.error('Error in handlePhotoSelected:', error);
+                Alert.alert('Error', 'Failed to save collection item');
             }
         }
         setShowPhotoPicker(false);
@@ -300,11 +337,50 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                     <Text style={[styles.tabBtnText, tab === 'wishlist' && styles.tabBtnTextActive]}>Wishlist Dreams 🌈</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Sorting Options */}
+            <View style={styles.sortRow}>
+                <Text style={styles.sortLabel}>Sort by:</Text>
+                <View style={styles.sortButtons}>
+                    <TouchableOpacity
+                        style={[styles.sortButton, sortBy === 'series' && styles.sortButtonActive]}
+                        onPress={() => setSortBy('series')}
+                    >
+                        <Text style={[styles.sortButtonText, sortBy === 'series' && styles.sortButtonTextActive]}>Series</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.sortButton, sortBy === 'name' && styles.sortButtonActive]}
+                        onPress={() => setSortBy('name')}
+                    >
+                        <Text style={[styles.sortButtonText, sortBy === 'name' && styles.sortButtonTextActive]}>Name</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.sortButton, sortBy === 'rarity' && styles.sortButtonActive]}
+                        onPress={() => setSortBy('rarity')}
+                    >
+                        <Text style={[styles.sortButtonText, sortBy === 'rarity' && styles.sortButtonTextActive]}>Rarity</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.sortButton, sortBy === 'date' && styles.sortButtonActive]}
+                        onPress={() => setSortBy('date')}
+                    >
+                        <Text style={[styles.sortButtonText, sortBy === 'date' && styles.sortButtonTextActive]}>Date</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             <View style={styles.statsBox}>
                 <Text style={styles.stat}>Collection: <Text style={styles.statValue}>{ownedCount}/{COLLECTION_LIMITS.BETA_MAX_FIGURES}</Text> figures</Text>
                 <Text style={styles.stat}>Owned: <Text style={styles.statValue}>{ownedCount}</Text> figures</Text>
                 <Text style={styles.stat}>Wishlist: <Text style={styles.statValue}>{wishlistCount}</Text> figures</Text>
                 <Text style={styles.stat}>Collection Value: <Text style={styles.statValue}>${collectionValue}</Text></Text>
+            </View>
+
+            {/* Naming Note */}
+            <View style={styles.namingNote}>
+                <Text style={styles.namingNoteText}>
+                    💡 Note: Some figures may have community nicknames (e.g., "Cozy Chair" is sometimes called "Sit Pretty")
+                </Text>
             </View>
             {loading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -318,7 +394,21 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                         data={ownedFigures}
                         keyExtractor={item => item.id.toString()}
                         contentContainerStyle={styles.listContent}
-                        renderItem={({ item }) => renderFigure(item, true)}
+                        renderItem={({ item, index }) => {
+                            const showSeriesHeader = sortBy === 'series' &&
+                                (index === 0 || ownedFigures[index - 1].series !== item.series);
+
+                            return (
+                                <View>
+                                    {showSeriesHeader && (
+                                        <View style={styles.seriesHeader}>
+                                            <Text style={styles.seriesHeaderText}>{item.series}</Text>
+                                        </View>
+                                    )}
+                                    {renderFigure(item, true)}
+                                </View>
+                            );
+                        }}
                     />
                 )
             ) : (
@@ -329,7 +419,21 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                         data={wishlistFigures}
                         keyExtractor={item => item.id.toString()}
                         contentContainerStyle={styles.listContent}
-                        renderItem={({ item }) => renderFigure(item, false)}
+                        renderItem={({ item, index }) => {
+                            const showSeriesHeader = sortBy === 'series' &&
+                                (index === 0 || wishlistFigures[index - 1].series !== item.series);
+
+                            return (
+                                <View>
+                                    {showSeriesHeader && (
+                                        <View style={styles.seriesHeader}>
+                                            <Text style={styles.seriesHeaderText}>{item.series}</Text>
+                                        </View>
+                                    )}
+                                    {renderFigure(item, false)}
+                                </View>
+                            );
+                        }}
                     />
                 )
             )}
@@ -705,5 +809,80 @@ const styles = StyleSheet.create({
         fontSize: fontSizes.md,
         fontWeight: 'bold',
         letterSpacing: 0.5,
+    },
+    // Sorting Styles
+    sortRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+        backgroundColor: colors.background,
+    },
+    sortLabel: {
+        fontSize: fontSizes.sm,
+        color: colors.textSecondary,
+        fontWeight: '600',
+        marginRight: spacing.sm,
+    },
+    sortButtons: {
+        flexDirection: 'row',
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    sortButton: {
+        paddingVertical: spacing.xs,
+        paddingHorizontal: spacing.sm,
+        borderRadius: 12,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        minWidth: 60,
+        alignItems: 'center',
+    },
+    sortButtonActive: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    sortButtonText: {
+        fontSize: fontSizes.xs,
+        color: colors.textPrimary,
+        fontWeight: '500',
+    },
+    sortButtonTextActive: {
+        color: colors.white,
+        fontWeight: '600',
+    },
+    // Naming Note Styles
+    namingNote: {
+        backgroundColor: '#FFF8E1',
+        borderLeftWidth: 4,
+        borderLeftColor: '#FFB74D',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        marginHorizontal: spacing.lg,
+        marginBottom: spacing.sm,
+        borderRadius: 8,
+    },
+    namingNoteText: {
+        fontSize: fontSizes.xs,
+        color: '#E65100',
+        lineHeight: 16,
+        fontStyle: 'italic',
+    },
+    // Series Header Styles
+    seriesHeader: {
+        backgroundColor: colors.primary,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        marginTop: spacing.md,
+        marginBottom: spacing.sm,
+        borderRadius: 8,
+        marginHorizontal: spacing.lg,
+    },
+    seriesHeaderText: {
+        fontSize: fontSizes.md,
+        fontWeight: 'bold',
+        color: colors.white,
+        textAlign: 'center',
     },
 }); 
