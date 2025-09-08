@@ -8,6 +8,7 @@ import {
     Dimensions,
     ActivityIndicator,
     Alert,
+    SafeAreaView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, spacing, fontSizes, shadows, gradients } from './designSystem';
@@ -312,13 +313,13 @@ export default function CollectionAnalyticsScreen({ onBack, collectionItems }: C
 
     try {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 {/* Header */}
-                <LinearGradient colors={gradients.header || ['#FF6B9D', '#C44569']} style={styles.header}>
+                <LinearGradient colors={gradients.header} style={styles.header}>
                     <TouchableOpacity onPress={onBack} style={styles.backButton}>
                         <Text style={styles.backButtonText}>← Back</Text>
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Collection Analytics</Text>
+                    <Text style={styles.headerTitle}>Collection Analytics 📊</Text>
                     <View style={styles.headerSpacer} />
                 </LinearGradient>
 
@@ -358,17 +359,17 @@ export default function CollectionAnalyticsScreen({ onBack, collectionItems }: C
                     {selectedTab === 'rarity' && renderRarity()}
                     {selectedTab === 'milestones' && renderMilestones()}
                 </ScrollView>
-            </View>
+            </SafeAreaView>
         );
     } catch (error) {
         console.error('Error rendering CollectionAnalyticsScreen:', error);
         return (
-            <View style={styles.loadingContainer}>
+            <SafeAreaView style={styles.loadingContainer}>
                 <Text style={styles.loadingText}>Error loading analytics</Text>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Text style={styles.backButtonText}>Go Back</Text>
                 </TouchableOpacity>
-            </View>
+            </SafeAreaView>
         );
     }
 }
@@ -395,39 +396,45 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.md,
         paddingTop: spacing.xl,
-        ...shadows.medium,
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+        ...shadows.card,
     },
     backButton: {
         padding: spacing.sm,
     },
     backButtonText: {
         fontSize: fontSizes.md,
-        color: colors.white,
+        color: '#6C3DD1',
         fontWeight: '600',
     },
     headerTitle: {
         flex: 1,
         fontSize: fontSizes.xl,
-        fontWeight: 'bold',
-        color: colors.white,
+        fontWeight: '700',
+        color: '#6C3DD1',
         textAlign: 'center',
+        letterSpacing: 1.2,
     },
     headerSpacer: {
         width: 60,
     },
     tabNavigation: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
+        backgroundColor: colors.card,
         paddingHorizontal: spacing.sm,
         paddingVertical: spacing.xs,
-        ...shadows.small,
+        marginHorizontal: spacing.lg,
+        marginTop: spacing.md,
+        borderRadius: 22,
+        ...shadows.card,
     },
     tabButton: {
         flex: 1,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.xs,
         alignItems: 'center',
-        borderRadius: spacing.sm,
+        borderRadius: 18,
         marginHorizontal: spacing.xs,
     },
     activeTabButton: {
@@ -439,8 +446,8 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     activeTabButtonText: {
-        color: colors.white,
-        fontWeight: '600',
+        color: colors.card,
+        fontWeight: '700',
     },
     content: {
         flex: 1,
@@ -456,13 +463,13 @@ const styles = StyleSheet.create({
     },
     statCard: {
         width: (SCREEN_WIDTH - spacing.lg * 2 - spacing.md) / 2,
-        backgroundColor: colors.white,
+        backgroundColor: colors.card,
         padding: spacing.lg,
-        borderRadius: spacing.md,
+        borderRadius: 22,
         alignItems: 'center',
         marginBottom: spacing.md,
         marginRight: spacing.md,
-        ...shadows.small,
+        ...shadows.card,
     },
     statNumber: {
         fontSize: fontSizes.xxl,

@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Alert,
     Modal,
+    SafeAreaView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, spacing, fontSizes, shadows, gradients } from './designSystem';
@@ -250,13 +251,13 @@ export default function AchievementScreen({ onBack, collectionItems, analytics }
     const filteredAchievements = getFilteredAchievements();
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Header */}
-            <LinearGradient colors={gradients.header || ['#FF6B9D', '#C44569']} style={styles.header}>
+            <LinearGradient colors={gradients.header} style={styles.header}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Text style={styles.backButtonText}>← Back</Text>
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Achievements</Text>
+                <Text style={styles.headerTitle}>Achievements 🏆</Text>
                 <View style={styles.headerSpacer} />
             </LinearGradient>
 
@@ -283,7 +284,7 @@ export default function AchievementScreen({ onBack, collectionItems, analytics }
 
             {/* Unlock Modal */}
             {renderUnlockModal()}
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -309,32 +310,35 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.md,
         paddingTop: spacing.xl,
-        ...shadows.medium,
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+        ...shadows.card,
     },
     backButton: {
         padding: spacing.sm,
     },
     backButtonText: {
         fontSize: fontSizes.md,
-        color: colors.white,
+        color: '#6C3DD1',
         fontWeight: '600',
     },
     headerTitle: {
         flex: 1,
         fontSize: fontSizes.xl,
-        fontWeight: 'bold',
-        color: colors.white,
+        fontWeight: '700',
+        color: '#6C3DD1',
         textAlign: 'center',
+        letterSpacing: 1.2,
     },
     headerSpacer: {
         width: 60,
     },
     progressSummary: {
-        backgroundColor: colors.white,
+        backgroundColor: colors.card,
         padding: spacing.lg,
         margin: spacing.lg,
-        borderRadius: spacing.md,
-        ...shadows.small,
+        borderRadius: 22,
+        ...shadows.card,
     },
     levelContainer: {
         alignItems: 'center',
@@ -393,11 +397,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
     },
     achievementCard: {
-        backgroundColor: colors.white,
-        borderRadius: spacing.md,
+        backgroundColor: colors.card,
+        borderRadius: 22,
         padding: spacing.lg,
         marginBottom: spacing.md,
-        ...shadows.small,
+        marginHorizontal: spacing.lg,
+        ...shadows.card,
         opacity: 0.6,
     },
     unlockedCard: {
