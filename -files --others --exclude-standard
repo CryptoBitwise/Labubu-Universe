@@ -1,0 +1,5 @@
+[33m8ed668a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mphase-2-community-features[m[33m, [m[1;31morigin/phase-1-stable[m[33m, [m[1;32mphase-1-stable[m[33m, [m[1;32mmain[m[33m)[m Force fresh start for all users - clear old shared data and generate new unique IDs
+[33mc3e6687[m[33m ([m[1;31morigin/main[m[33m)[m Fix shared collection issue - each device now gets unique user ID
+[33me557413[m Fix collection saving - save immediately on changes and to local storage first
+[33m160b10c[m Add gem cleanup and RubyGems update to fix Bundler nil:NilClass error
+[33m577cd2d[m Regenerate ios/Gemfile.lock for Ruby 3.2 and Bundler 2.4.22
