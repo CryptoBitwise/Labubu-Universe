@@ -11,6 +11,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import BrowseFiguresScreen from './BrowseFiguresScreen';
 import CollectionScreen from './CollectionScreen';
 import LabubuList from './LabubuList';
+import CollectionSharingScreen from './CollectionSharingScreen';
 import { CollectionService, CollectionItem } from './collectionService';
 import { colors, spacing, fontSizes, gradients, shadows, COLLECTION_LIMITS } from './designSystem';
 const labubupink = require('./assets/labubupink.png');
@@ -159,6 +160,15 @@ function MyCollectionButton({ onPress }: { onPress: () => void }) {
   );
 }
 
+function CollectionSharingButton({ onPress }: { onPress: () => void }) {
+  return (
+    <AnimatedButton style={[styles.moduleCard, styles.sharingCard]} onPress={onPress}>
+      <Text style={styles.moduleTitle}>Share Collection 📤</Text>
+      <Text style={styles.moduleDesc}>Show off your collection on social media and export your data! 🌟</Text>
+    </AnimatedButton>
+  );
+}
+
 function TradingHubButton({ onPress }: { onPress: () => void }) {
   return (
     <AnimatedButton style={[styles.moduleCard, styles.tradingCard]} onPress={onPress}>
@@ -200,7 +210,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [screen, setScreen] = useState<'home' | 'browse' | 'collection' | 'labubulist'>('home');
+  const [screen, setScreen] = useState<'home' | 'browse' | 'collection' | 'labubulist' | 'sharing'>('home');
   const [owned, setOwned] = useState<string[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [showLore, setShowLore] = useState(false);
@@ -222,7 +232,7 @@ export default function App() {
 
       // Then save to Firebase Firestore (async)
       const firestoreSuccess = await CollectionService.saveCollection(items);
-      
+
       console.log('Collection saved successfully:', items.length, 'items');
     } catch (error) {
       console.error('Error saving collection:', error);
@@ -297,8 +307,29 @@ export default function App() {
 
     const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-    return () => {
-      subscription?.remove();
+    return () => subscription?.remove();
+  }, [collectionItems]);
+
+  // Memoize analytics for sharing screen to prevent infinite re-renders
+  const sharingAnalytics = React.useMemo(() => {
+    const ownedItems = collectionItems.filter(item => item.owned);
+    const wishlistItems = collectionItems.filter(item => item.wishlist);
+    const totalValue = ownedItems.reduce((sum, item) => {
+      return sum + (item.estimatedValue || 0);
+    }, 0);
+
+    return {
+      totalFigures: 58,
+      ownedCount: ownedItems.length,
+      wishlistCount: wishlistItems.length,
+      completionPercentage: Math.round((ownedItems.length / 58) * 100),
+      totalValue: { min: totalValue, max: totalValue, average: totalValue },
+      ownedValue: { min: totalValue, max: totalValue, average: totalValue },
+      wishlistValue: { min: 0, max: 0, average: 0 },
+      seriesStats: [],
+      rarityStats: [],
+      recentAdditions: ownedItems.slice(0, 5),
+      milestones: []
     };
   }, [collectionItems]);
 
@@ -513,6 +544,15 @@ export default function App() {
       </SafeAreaView>
     );
   }
+  if (screen === 'sharing') {
+    return (
+      <CollectionSharingScreen
+        onBack={() => setScreen('home')}
+        collectionItems={collectionItems}
+        analytics={sharingAnalytics}
+      />
+    );
+  }
 
 
   return (
@@ -568,6 +608,7 @@ export default function App() {
       >
         <LoreDiscoveryButton onPress={() => setShowLore(true)} />
         <MyCollectionButton onPress={() => setScreen('collection')} />
+        <CollectionSharingButton onPress={() => setScreen('sharing')} />
         <LabubuShopButton onPress={() => setScreen('labubulist')} />
         <PhotoStudioButton onPress={() => Alert.alert('Coming Soon!', 'Photo Studio feature will be available in a future update! 📸✨')} />
         <TradingHubButton onPress={() => Alert.alert('Coming Soon!')} />
@@ -775,6 +816,11 @@ const styles = StyleSheet.create({
     borderColor: '#BEE7F7',
     borderWidth: 2,
     shadowColor: '#BEE7F7',
+  },
+  sharingCard: {
+    borderColor: '#FF6B9D',
+    borderWidth: 2,
+    shadowColor: '#FF6B9D',
   },
   tradingCard: {
     borderColor: '#C6F9E0',

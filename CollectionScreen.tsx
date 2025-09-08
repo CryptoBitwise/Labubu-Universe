@@ -4,6 +4,8 @@ import { ALL_LABUBU_FIGURES } from './labubu_blind_box_data.js';
 import { colors, spacing, fontSizes, shadows, COLLECTION_LIMITS } from './designSystem';
 import PhotoPicker from './PhotoPicker';
 import { CollectionService } from './collectionService';
+import CollectionAnalyticsScreen from './CollectionAnalyticsScreen';
+import AchievementScreen from './AchievementScreen';
 
 // Collection item type with user photo support
 interface CollectionItem {
@@ -68,6 +70,8 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
     const [showPhotoPicker, setShowPhotoPicker] = useState(false);
     const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null);
     const [showLimitModal, setShowLimitModal] = useState(false);
+    const [showAnalytics, setShowAnalytics] = useState(false);
+    const [showAchievements, setShowAchievements] = useState(false);
     const ownedFigures = ALL_LABUBU_FIGURES.filter(f => owned.includes(f.id.toString()));
     const wishlistFigures = ALL_LABUBU_FIGURES.filter(f => wishlist.includes(f.id.toString()));
     const ownedCount = ownedFigures.length;
@@ -267,6 +271,20 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                     <Text style={styles.backButtonText}>← Back to Home</Text>
                 </TouchableOpacity>
                 <Text style={styles.title}>My Collection</Text>
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => setShowAchievements(true)}
+                    >
+                        <Text style={styles.headerButtonText}>🏆</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => setShowAnalytics(true)}
+                    >
+                        <Text style={styles.headerButtonText}>📊</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.tabRow}>
                 <TouchableOpacity
@@ -326,6 +344,43 @@ export default function CollectionScreen({ onBack, onBrowse, owned, wishlist, co
                 onClose={handlePhotoPickerClose}
             />
             <CollectionLimitModal />
+
+            {/* Analytics Modal */}
+            <Modal
+                visible={showAnalytics}
+                animationType="slide"
+                presentationStyle="fullScreen"
+            >
+                <CollectionAnalyticsScreen
+                    onBack={() => setShowAnalytics(false)}
+                    collectionItems={collectionItems}
+                />
+            </Modal>
+
+            {/* Achievement Modal */}
+            <Modal
+                visible={showAchievements}
+                animationType="slide"
+                presentationStyle="fullScreen"
+            >
+                <AchievementScreen
+                    onBack={() => setShowAchievements(false)}
+                    collectionItems={collectionItems}
+                    analytics={{
+                        totalFigures: ALL_LABUBU_FIGURES.length,
+                        ownedCount: ownedCount,
+                        wishlistCount: wishlistCount,
+                        completionPercentage: Math.round((ownedCount / ALL_LABUBU_FIGURES.length) * 100),
+                        totalValue: { min: collectionValue, max: collectionValue, average: collectionValue },
+                        ownedValue: { min: collectionValue, max: collectionValue, average: collectionValue },
+                        wishlistValue: { min: 0, max: 0, average: 0 },
+                        seriesStats: [],
+                        rarityStats: [],
+                        recentAdditions: [],
+                        milestones: []
+                    }}
+                />
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -357,6 +412,20 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         marginRight: 32,
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerButton: {
+        padding: spacing.sm,
+        borderRadius: 12,
+        backgroundColor: colors.accent,
+        marginLeft: spacing.sm,
+    },
+    headerButtonText: {
+        fontSize: fontSizes.lg,
+        color: colors.text,
     },
     tabRow: {
         flexDirection: 'row',
