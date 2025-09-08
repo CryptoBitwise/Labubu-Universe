@@ -10,10 +10,12 @@ export type LabubuFigure = {
     estimatedValue: { min: number; max: number };
     originalPrice: number;
     imageUrl: string;
+    userImageUrl?: string; // Optional: user-uploaded photo URL (keeps catalog imageUrl intact)
     features: string[];
     description: string;
     dimensions: string;
     buyLink: string; // New field for Pop Mart purchase link
+    ownedDate?: string; // Optional: when the user marked this as owned
 };
 
 export const labubuFigures: LabubuFigure[] = [
