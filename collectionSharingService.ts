@@ -118,7 +118,7 @@ export class CollectionSharingService {
      */
     static async shareToSocial(
         content: ShareableContent,
-        platform: 'instagram' | 'twitter' | 'facebook' | 'general'
+        _platform: 'instagram' | 'twitter' | 'facebook' | 'general'
     ): Promise<void> {
         const text = this.generateTextSummary(content);
 

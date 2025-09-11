@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, FlatList, Image, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { firestore, storage } from './firebaseConfig';
 import { launchImageLibrary, ImageLibraryOptions, Asset } from 'react-native-image-picker';
 import { labubuFigures, LabubuFigure } from './LabubuFiguresData';
@@ -12,6 +13,7 @@ const UserLabubuManager = ({ userId = 'user123' }: { userId: string }) => {
     const [labubus, setLabubus] = useState<LabubuFigure[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [sortBy, setSortBy] = useState<SortKey>('series');
+    const [selectedLabubuId, setSelectedLabubuId] = useState<number | null>(null);
 
     useEffect(() => {
         setIsLoading(true);
@@ -51,11 +53,15 @@ const UserLabubuManager = ({ userId = 'user123' }: { userId: string }) => {
         return () => unsubscribe();
     }, [userId, sortBy]);
 
-    const pickAndSaveLabubu = async (labubuId: number) => {
+    const pickAndSaveLabubu = async () => {
+        if (!selectedLabubuId) {
+            Alert.alert('Error', 'Please select a Labubu figure');
+            return;
+        }
         if (isLoading) return;
         setIsLoading(true);
         try {
-            const labubu = labubuFigures.find((f) => f.id === labubuId);
+            const labubu = labubuFigures.find((f) => f.id === selectedLabubuId);
             if (!labubu) {
                 Alert.alert('Error', 'Labubu not found');
                 return;
@@ -91,7 +97,7 @@ const UserLabubuManager = ({ userId = 'user123' }: { userId: string }) => {
                 .collection('users')
                 .doc(userId)
                 .collection('labubus')
-                .doc(String(labubuId))
+                .doc(String(selectedLabubuId))
                 .set(labubuData);
 
             Alert.alert('Success', `${labubu.name} saved with image!`);
@@ -116,9 +122,27 @@ const UserLabubuManager = ({ userId = 'user123' }: { userId: string }) => {
                 <Button title="Sort by Name" onPress={() => setSortBy('name')} disabled={sortBy === 'name'} />
                 <Button title="Sort by Rarity" onPress={() => setSortBy('rarity')} disabled={sortBy === 'rarity'} />
             </View>
-            <Button title={isLoading ? 'Saving...' : 'Add Green Grape'} onPress={() => pickAndSaveLabubu(6)} disabled={isLoading} />
-            <Button title={isLoading ? 'Saving...' : 'Add Hehe'} onPress={() => pickAndSaveLabubu(10)} disabled={isLoading} />
-            <Button title={isLoading ? 'Saving...' : 'Add Love'} onPress={() => pickAndSaveLabubu(38)} disabled={isLoading} />
+            <View style={styles.pickerContainer}>
+                <Picker
+                    selectedValue={selectedLabubuId}
+                    onValueChange={(itemValue) => setSelectedLabubuId(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Select a Labubu" value={null} />
+                    {labubuFigures.map((figure) => (
+                        <Picker.Item
+                            key={figure.id}
+                            label={`${figure.name} (${figure.series})`}
+                            value={figure.id}
+                        />
+                    ))}
+                </Picker>
+            </View>
+            <Button
+                title={isLoading ? 'Saving...' : 'Add Selected Labubu'}
+                onPress={pickAndSaveLabubu}
+                disabled={isLoading || !selectedLabubuId}
+            />
             <FlatList
                 data={labubus}
                 keyExtractor={(item) => String(item.id)}
@@ -159,7 +183,20 @@ const styles = StyleSheet.create({
     series: { fontSize: 12, color: '#666' },
     rarity: { fontSize: 12, color: '#888' },
     date: { fontSize: 12, color: '#888' },
-    separator: { height: 1, backgroundColor: '#ddd', marginVertical: 8 }
+    separator: { height: 1, backgroundColor: '#ddd', marginVertical: 8 },
+    pickerContainer: {
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#fff',
+        paddingHorizontal: 8
+    },
+    picker: {
+        height: 50,
+        width: '100%',
+        color: '#333'
+    }
 });
 
 export default UserLabubuManager;

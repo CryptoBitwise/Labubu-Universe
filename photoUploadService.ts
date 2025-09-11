@@ -1,5 +1,5 @@
 import { storage } from './firebaseConfig';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native'; // Unused for now
 
 export interface PhotoUploadResult {
     success: boolean;

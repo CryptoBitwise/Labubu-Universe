@@ -201,7 +201,7 @@ function PhotoStudioButton({ onPress }: { onPress: () => void }) {
   return (
     <AnimatedButton style={[styles.moduleCard, styles.photoCard]} onPress={onPress}>
       <Text style={styles.moduleTitle}>Photo Studio 📸</Text>
-      <Text style={styles.moduleDesc}>Upload and share photos of your Labubu collection! (Coming Soon) ✨</Text>
+      <Text style={styles.moduleDesc}>Upload and share photos of your Labubu collection! ✨</Text>
     </AnimatedButton>
   );
 }
@@ -210,7 +210,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [screen, setScreen] = useState<'home' | 'browse' | 'collection' | 'labubulist' | 'sharing'>('home');
+  const [screen, setScreen] = useState<'home' | 'browse' | 'collection' | 'labubulist' | 'sharing' | 'photostudio'>('home');
   const [owned, setOwned] = useState<string[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [showLore, setShowLore] = useState(false);
@@ -319,10 +319,10 @@ export default function App() {
     }, 0);
 
     return {
-      totalFigures: 58,
+      totalFigures: 132,
       ownedCount: ownedItems.length,
       wishlistCount: wishlistItems.length,
-      completionPercentage: Math.round((ownedItems.length / 58) * 100),
+      completionPercentage: Math.round((ownedItems.length / 132) * 100),
       totalValue: { min: totalValue, max: totalValue, average: totalValue },
       ownedValue: { min: totalValue, max: totalValue, average: totalValue },
       wishlistValue: { min: 0, max: 0, average: 0 },
@@ -553,6 +553,38 @@ export default function App() {
       />
     );
   }
+  if (screen === 'photostudio') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>
+            Photo Studio 📸
+          </Text>
+          <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 30, color: '#666' }}>
+            This feature is coming soon!
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: colors.primary,
+              borderRadius: 12,
+              paddingVertical: 15,
+              paddingHorizontal: 30,
+              alignItems: 'center',
+            }}
+            onPress={() => setScreen('home')}
+          >
+            <Text style={{
+              color: colors.card,
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}>
+              Back to Home
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
 
   return (
@@ -610,7 +642,7 @@ export default function App() {
         <MyCollectionButton onPress={() => setScreen('collection')} />
         <CollectionSharingButton onPress={() => setScreen('sharing')} />
         <LabubuShopButton onPress={() => setScreen('labubulist')} />
-        <PhotoStudioButton onPress={() => Alert.alert('Coming Soon!', 'Photo Studio feature will be available in a future update! 📸✨')} />
+        <PhotoStudioButton onPress={() => setScreen('photostudio')} />
         <TradingHubButton onPress={() => Alert.alert('Coming Soon!')} />
         <DisplayStudioButton onPress={() => Alert.alert('Coming Soon!')} />
       </ScrollView>
