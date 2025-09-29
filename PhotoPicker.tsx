@@ -11,6 +11,7 @@ import {
     PermissionsAndroid,
     Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, spacing, fontSizes, shadows, gradients } from './designSystem';
 
@@ -25,6 +26,8 @@ interface PhotoPickerProps {
     userId: string;
     onPhotoSelected: (photoUri: string) => void;
     onClose: () => void;
+    allowMultiple?: boolean;
+    onPhotosSelected?: (photoUris: string[]) => void;
 }
 
 const PhotoPicker: React.FC<PhotoPickerProps> = ({
@@ -33,8 +36,11 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
     userId,
     onPhotoSelected,
     onClose,
+    allowMultiple = false,
+    onPhotosSelected,
 }) => {
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState<number | null>(null);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Debug logging
@@ -43,6 +49,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
     // Cleanup function to reset loading state and clear timeouts
     const resetLoadingState = () => {
         setLoading(false);
+        setProgress(null);
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -64,6 +71,25 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
             }
         };
     }, []);
+
+    const LastUsedSourceHint = () => {
+        const [last, setLast] = useState<string | null>(null);
+        useEffect(() => {
+            (async () => {
+                try {
+                    const v = await AsyncStorage.getItem('lu:lastPhotoSource');
+                    if (v) setLast(v);
+                } catch { }
+            })();
+        }, []);
+        if (!last) return null;
+        const label = last === 'camera' ? 'Camera' : 'Gallery';
+        return (
+            <Text style={{ color: colors.textSecondary, fontSize: fontSizes.sm, marginTop: spacing.xs }}>
+                Last used: {label}
+            </Text>
+        );
+    };
 
     // Request camera permission
     const requestCameraPermission = async (): Promise<boolean> => {
@@ -125,6 +151,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
 
     const handleTakePhoto = async () => {
         setLoading(true);
+        setProgress(null);
 
         // Check camera permission first
         const hasPermission = await requestCameraPermission();
@@ -169,7 +196,9 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                 console.log('Photo captured:', photoUri);
                 if (photoUri) {
                     try {
-                        // Upload to Firebase Storage
+                        await AsyncStorage.setItem('lu:lastPhotoSource', 'camera');
+                        // Upload to Firebase Storage with simple progress emulation
+                        setProgress(0.1);
                         const uploadResult = await PhotoUploadService.uploadPhoto(photoUri, figureId, userId);
                         if (uploadResult.success && uploadResult.downloadUrl) {
                             console.log('Photo uploaded successfully:', uploadResult.downloadUrl);
@@ -184,6 +213,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                         Alert.alert('Upload Error', 'Failed to upload photo');
                     } finally {
                         setLoading(false);
+                        setProgress(null);
                     }
                 } else {
                     setLoading(false);
@@ -196,6 +226,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
 
     const handleChooseFromGallery = async () => {
         setLoading(true);
+        setProgress(null);
 
         // Check storage permission first
         const hasPermission = await requestStoragePermission();
@@ -215,7 +246,7 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
             maxWidth: 1024,
             maxHeight: 1024,
             includeBase64: false,
-            selectionLimit: 1,
+            selectionLimit: allowMultiple ? 0 : 1,
         };
 
         launchImageLibrary(options, async (response: ImagePickerResponse) => {
@@ -234,29 +265,36 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                 return;
             }
 
-            if (response.assets && response.assets[0]) {
-                const photoUri = response.assets[0].uri;
-                console.log('Photo selected:', photoUri);
-                if (photoUri) {
-                    try {
-                        // Upload to Firebase Storage
-                        const uploadResult = await PhotoUploadService.uploadPhoto(photoUri, figureId, userId);
-                        if (uploadResult.success && uploadResult.downloadUrl) {
-                            console.log('Photo uploaded successfully:', uploadResult.downloadUrl);
-                            onPhotoSelected(uploadResult.downloadUrl);
-                            onClose();
-                        } else {
-                            console.log('Upload failed:', uploadResult.error);
-                            Alert.alert('Upload Error', uploadResult.error || 'Failed to upload photo');
+            if (response.assets && response.assets.length > 0) {
+                try {
+                    await AsyncStorage.setItem('lu:lastPhotoSource', 'gallery');
+                    setProgress(0.1);
+                    const uris = response.assets.map(a => a.uri).filter(Boolean) as string[];
+                    const uploaded: string[] = [];
+                    for (let i = 0; i < uris.length; i++) {
+                        const u = uris[i];
+                        const result = await PhotoUploadService.uploadPhoto(u, figureId, userId);
+                        if (result.success && result.downloadUrl) {
+                            uploaded.push(result.downloadUrl);
+                            setProgress((i + 1) / uris.length);
                         }
-                    } catch (error) {
-                        console.log('Upload error:', error);
-                        Alert.alert('Upload Error', 'Failed to upload photo');
-                    } finally {
-                        setLoading(false);
                     }
-                } else {
+                    if (uploaded.length > 0) {
+                        if (allowMultiple && onPhotosSelected) {
+                            onPhotosSelected(uploaded);
+                        } else {
+                            onPhotoSelected(uploaded[0]);
+                        }
+                        onClose();
+                    } else {
+                        Alert.alert('Upload Error', 'Failed to upload selected photos');
+                    }
+                } catch (error) {
+                    console.log('Upload error:', error);
+                    Alert.alert('Upload Error', 'Failed to upload photo');
+                } finally {
                     setLoading(false);
+                    setProgress(null);
                 }
             } else {
                 setLoading(false);
@@ -302,6 +340,8 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                             <Text style={styles.subtitle}>
                                 Take a photo with your camera or choose from your gallery to add to your Labubu collection!
                             </Text>
+                            {/* Show hint for last used source */}
+                            <LastUsedSourceHint />
                         </LinearGradient>
 
                         <View style={styles.buttonContainer}>
@@ -318,7 +358,10 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                                     style={styles.buttonGradient}
                                 >
                                     {loading ? (
-                                        <ActivityIndicator color="white" size="small" />
+                                        <View style={styles.progressRow}>
+                                            <ActivityIndicator color="white" size="small" />
+                                            {progress !== null ? (<Text style={styles.progressText}>{Math.round(progress * 100)}%</Text>) : null}
+                                        </View>
                                     ) : (
                                         <>
                                             <Text style={styles.buttonIcon}>📸</Text>
@@ -341,7 +384,10 @@ const PhotoPicker: React.FC<PhotoPickerProps> = ({
                                     style={styles.buttonGradient}
                                 >
                                     {loading ? (
-                                        <ActivityIndicator color="white" size="small" />
+                                        <View style={styles.progressRow}>
+                                            <ActivityIndicator color="white" size="small" />
+                                            {progress !== null ? (<Text style={styles.progressText}>{Math.round(progress * 100)}%</Text>) : null}
+                                        </View>
                                     ) : (
                                         <>
                                             <Text style={styles.buttonIcon}>🖼️</Text>
@@ -454,6 +500,17 @@ const styles = StyleSheet.create({
         fontSize: fontSizes.md,
         fontWeight: '600',
         textAlign: 'center',
+    },
+    progressRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    progressText: {
+        color: 'white',
+        fontSize: fontSizes.sm,
+        marginLeft: spacing.sm,
+        fontWeight: '600',
     },
     skipButtonText: {
         color: colors.primary,

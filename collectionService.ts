@@ -5,6 +5,7 @@ export interface CollectionItem {
     owned: boolean;
     wishlist: boolean;
     userPhoto?: string;
+    userPhotos?: string[];
     dateAdded?: string;
     notes?: string;
 }

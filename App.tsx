@@ -8,11 +8,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, SafeAreaView, StatusBar, Animated, Modal, Dimensions, Easing, ScrollView, AppState } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import auth from '@react-native-firebase/auth';
 import BrowseFiguresScreen from './BrowseFiguresScreen';
 import CollectionScreen from './CollectionScreen';
 import LabubuList from './LabubuList';
 import CollectionSharingScreen from './CollectionSharingScreen';
 import { CollectionService, CollectionItem } from './collectionService';
+import PhotoStudioScreen from './PhotoStudioScreen';
 import { colors, spacing, fontSizes, gradients, shadows, COLLECTION_LIMITS } from './designSystem';
 const labubupink = require('./assets/labubupink.png');
 
@@ -217,6 +219,19 @@ export default function App() {
   const [loreTip, setLoreTip] = useState(LORE_TIPS[0]);
 
   const [collectionItems, setCollectionItems] = useState<CollectionItem[]>([]);
+
+  // Sign in anonymously to Firebase Auth
+  useEffect(() => {
+    const signInAnonymously = async () => {
+      try {
+        await auth().signInAnonymously();
+        console.log('User signed in anonymously');
+      } catch (error) {
+        console.error('Anonymous sign-in error:', error);
+      }
+    };
+    signInAnonymously();
+  }, []);
 
   // Check if collection limit is reached
   const isCollectionLimitReached = useCallback(() => {
@@ -555,34 +570,14 @@ export default function App() {
   }
   if (screen === 'photostudio') {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>
-            Photo Studio 📸
-          </Text>
-          <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 30, color: '#666' }}>
-            This feature is coming soon!
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: colors.primary,
-              borderRadius: 12,
-              paddingVertical: 15,
-              paddingHorizontal: 30,
-              alignItems: 'center',
-            }}
-            onPress={() => setScreen('home')}
-          >
-            <Text style={{
-              color: colors.card,
-              fontSize: 16,
-              fontWeight: 'bold',
-            }}>
-              Back to Home
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <PhotoStudioScreen
+        onBack={() => setScreen('home')}
+        collectionItems={collectionItems}
+        onUpdateCollectionItems={(items) => {
+          setCollectionItems(items);
+          saveCollection(items);
+        }}
+      />
     );
   }
 
