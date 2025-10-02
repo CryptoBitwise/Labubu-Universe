@@ -37,24 +37,34 @@ const SPLASH_DURATION = 3500;
 
 // CollectionItem interface is imported from collectionService.ts
 
-function SplashScreen({ onFinish }: { onFinish: () => void }) {
+function SplashScreen({ onFinish, isAuthReady, authError }: {
+  onFinish: () => void;
+  isAuthReady?: boolean;
+  authError?: string | null;
+}) {
   const [fadeIn] = useState(new Animated.Value(0));
   const [fadeOut] = useState(new Animated.Value(1));
+
   useEffect(() => {
     Animated.timing(fadeIn, {
       toValue: 1,
       duration: 900,
       useNativeDriver: true,
     }).start();
+
+    // Only finish splash when auth is ready or after timeout
     const timer = setTimeout(() => {
-      Animated.timing(fadeOut, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(onFinish);
+      if (isAuthReady !== false) { // Allow finish if auth is ready or undefined
+        Animated.timing(fadeOut, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }).start(onFinish);
+      }
     }, SPLASH_DURATION);
+
     return () => clearTimeout(timer);
-  }, [fadeIn, fadeOut, onFinish]);
+  }, [fadeIn, fadeOut, onFinish, isAuthReady]);
 
   // Cute loading sparkle animation
   const sparkleAnim = useState(new Animated.Value(0))[0];
@@ -98,7 +108,32 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
           opacity: sparkleOpacity,
           transform: [{ translateY: sparkleY }],
         }}>✨</Animated.Text>
-        <Text style={styles.splashLoadingText}>Loading Labubu magic...</Text>
+        <Text style={styles.splashLoadingText}>
+          {authError ? 'Authentication failed' :
+            isAuthReady === false ? 'Initializing...' :
+              'Loading Labubu magic...'}
+        </Text>
+        {authError && (
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              setAuthError(null);
+              setIsAuthReady(false);
+              // Restart auth process
+              const initializeAuth = async () => {
+                try {
+                  await auth().signInAnonymously();
+                  setIsAuthReady(true);
+                } catch (error) {
+                  setAuthError('Authentication failed. Please restart the app.');
+                }
+              };
+              initializeAuth();
+            }}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        )}
       </Animated.View>
     </Animated.View>
   );
@@ -220,17 +255,56 @@ export default function App() {
 
   const [collectionItems, setCollectionItems] = useState<CollectionItem[]>([]);
 
-  // Sign in anonymously to Firebase Auth
+  // Auth state management
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Sign in anonymously to Firebase Auth and wait for auth state to be ready
   useEffect(() => {
-    const signInAnonymously = async () => {
+    const initializeAuth = async () => {
       try {
+        console.log('🔄 Starting anonymous authentication...');
+
+        // Sign in anonymously
         await auth().signInAnonymously();
-        console.log('User signed in anonymously');
+        console.log('✅ User signed in anonymously');
+
+        // Wait for auth state to be ready (iOS bridge timing fix)
+        const unsubscribe = auth().onAuthStateChanged(async (user) => {
+          if (user) {
+            console.log('✅ Auth state confirmed, user ID:', user.uid);
+            setIsAuthReady(true);
+            setAuthError(null);
+            unsubscribe(); // Stop listening once we have auth
+          } else {
+            console.log('⚠️ Auth state changed to null, retrying...');
+            // Retry authentication if user becomes null
+            try {
+              await auth().signInAnonymously();
+            } catch (retryError) {
+              console.error('❌ Auth retry failed:', retryError);
+              setAuthError('Authentication failed. Please restart the app.');
+            }
+          }
+        });
+
+        // Timeout fallback for iOS bridge issues
+        setTimeout(() => {
+          if (!isAuthReady) {
+            console.log('⚠️ Auth timeout, proceeding with fallback...');
+            setIsAuthReady(true);
+          }
+        }, 5000); // 5 second timeout
+
       } catch (error) {
-        console.error('Anonymous sign-in error:', error);
+        console.error('❌ Anonymous sign-in error:', error);
+        setAuthError('Authentication failed. Please restart the app.');
+        // Still set auth ready to allow local-only mode
+        setIsAuthReady(true);
       }
     };
-    signInAnonymously();
+
+    initializeAuth();
   }, []);
 
   // Check if collection limit is reached
@@ -245,28 +319,50 @@ export default function App() {
       // Save to local storage first (immediate)
       await CollectionService.syncWithLocalStorage(items);
 
-      // Then save to Firebase Firestore (async)
-      const firestoreSuccess = await CollectionService.saveCollection(items);
-
-      console.log('Collection saved successfully:', items.length, 'items');
+      // Only try Firebase if auth is ready
+      if (isAuthReady) {
+        const firestoreSuccess = await CollectionService.saveCollection(items);
+        if (firestoreSuccess) {
+          console.log('✅ Collection saved to Firebase:', items.length, 'items');
+        } else {
+          console.log('⚠️ Firebase save failed, but local backup saved');
+        }
+      } else {
+        console.log('⚠️ Auth not ready, saved locally only');
+      }
     } catch (error) {
-      console.error('Error saving collection:', error);
+      console.error('❌ Error saving collection:', error);
     }
   };
 
   // Load collection from Firebase Firestore (with local fallback)
   const loadCollection = async () => {
     try {
-      // Try to load from Firebase first
-      let items = await CollectionService.loadCollection();
+      let items: CollectionItem[] = [];
+
+      // Try Firebase first if auth is ready
+      if (isAuthReady) {
+        try {
+          items = await CollectionService.loadCollection();
+          console.log('✅ Loaded from Firebase:', items.length, 'items');
+        } catch (firebaseError) {
+          console.log('⚠️ Firebase load failed, trying local storage:', firebaseError);
+        }
+      }
 
       // If Firebase is empty or failed, try local storage as fallback
       if (!items || items.length === 0) {
         items = await CollectionService.loadFromLocalStorage();
+        console.log('✅ Loaded from local storage:', items.length, 'items');
 
-        // If we found items in local storage, sync them to Firebase
-        if (items && items.length > 0) {
-          await CollectionService.saveCollection(items);
+        // If we found items in local storage and auth is ready, sync them to Firebase
+        if (items && items.length > 0 && isAuthReady) {
+          try {
+            await CollectionService.saveCollection(items);
+            console.log('✅ Synced local data to Firebase');
+          } catch (syncError) {
+            console.log('⚠️ Failed to sync to Firebase:', syncError);
+          }
         }
       }
 
@@ -289,21 +385,23 @@ export default function App() {
       setOwned(loadedOwned);
       setWishlist(loadedWishlist);
     } catch (error) {
-      console.error('Error loading collection:', error);
+      console.error('❌ Error loading collection:', error);
       // Fallback to local storage only
       try {
         const items = await CollectionService.loadFromLocalStorage();
         setCollectionItems(items);
       } catch (localError) {
-        console.error('Local storage fallback also failed:', localError);
+        console.error('❌ Local storage fallback also failed:', localError);
       }
     }
   };
 
-  // Load collection on app start
+  // Load collection when auth is ready
   useEffect(() => {
-    loadCollection();
-  }, []);
+    if (isAuthReady) {
+      loadCollection();
+    }
+  }, [isAuthReady]);
 
   // Save collection whenever it changes (immediate save)
   useEffect(() => {
@@ -460,7 +558,11 @@ export default function App() {
   const twinkle = floating.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] });
 
   if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+    return <SplashScreen
+      onFinish={() => setShowSplash(false)}
+      isAuthReady={isAuthReady}
+      authError={authError}
+    />;
   }
 
   // Lore & Discovery Modal
@@ -1017,6 +1119,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     letterSpacing: 0.5,
     opacity: 0.8,
+  },
+  retryButton: {
+    backgroundColor: '#F9C6E0',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+    marginTop: 16,
+    ...shadows.card,
+  },
+  retryButtonText: {
+    color: '#6C3DD1',
+    fontSize: fontSizes.md,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

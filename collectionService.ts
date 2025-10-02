@@ -1,4 +1,5 @@
 import { firestore } from './firebaseConfig';
+import auth from '@react-native-firebase/auth';
 
 export interface CollectionItem {
     figureId: string;
@@ -18,6 +19,8 @@ export interface UserCollection {
 
 export class CollectionService {
     private static readonly COLLECTION_NAME = 'userCollections';
+    private static readonly MAX_RETRIES = 3;
+    private static readonly RETRY_DELAY = 1000; // 1 second
 
     /**
      * Clean collection items by removing undefined values (Firebase doesn't support undefined)
@@ -38,13 +41,66 @@ export class CollectionService {
     }
 
     /**
+     * Wait for authentication to be ready (iOS bridge timing fix)
+     */
+    private static async waitForAuth(): Promise<boolean> {
+        return new Promise((resolve) => {
+            const user = auth().currentUser;
+            if (user) {
+                resolve(true);
+                return;
+            }
+
+            // Wait for auth state change
+            const unsubscribe = auth().onAuthStateChanged((user) => {
+                unsubscribe();
+                resolve(!!user);
+            });
+
+            // Timeout after 3 seconds
+            setTimeout(() => {
+                unsubscribe();
+                resolve(false);
+            }, 3000);
+        });
+    }
+
+    /**
+     * Retry Firestore operation with exponential backoff
+     */
+    private static async retryOperation<T>(
+        operation: () => Promise<T>,
+        operationName: string,
+        retries: number = this.MAX_RETRIES
+    ): Promise<T> {
+        try {
+            return await operation();
+        } catch (error: any) {
+            // Check if it's a permission error and auth might not be ready
+            if (error.code === 'firestore/permission-denied' && retries > 0) {
+                console.log(`⚠️ ${operationName} failed with permission denied, waiting for auth...`);
+
+                // Wait for auth to be ready
+                const authReady = await this.waitForAuth();
+                if (authReady) {
+                    console.log(`🔄 Retrying ${operationName} after auth ready...`);
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
+                    return this.retryOperation(operation, operationName, retries - 1);
+                }
+            }
+
+            throw error;
+        }
+    }
+
+    /**
      * Save user's collection to Firestore
-     * @param userId - Unique user identifier
      * @param items - Array of collection items
      */
     static async saveCollection(items: CollectionItem[]): Promise<boolean> {
-        const userId = await this.getUserId();
         try {
+            const userId = await this.getUserId();
+
             // Clean items to remove undefined values
             const cleanedItems = this.cleanCollectionItems(items);
 
@@ -54,29 +110,37 @@ export class CollectionService {
                 lastUpdated: new Date().toISOString()
             };
 
-            await firestore()
-                .collection(this.COLLECTION_NAME)
-                .doc(userId)
-                .set(userCollection);
+            // Use retry logic for Firestore operations
+            await this.retryOperation(
+                () => firestore()
+                    .collection(this.COLLECTION_NAME)
+                    .doc(userId)
+                    .set(userCollection),
+                'saveCollection'
+            );
 
             return true;
         } catch (error) {
-            console.error('Error saving collection:', error);
+            console.error('❌ Error saving collection:', error);
             return false;
         }
     }
 
     /**
      * Load user's collection from Firestore
-     * @param userId - Unique user identifier
      */
     static async loadCollection(): Promise<CollectionItem[]> {
-        const userId = await this.getUserId();
         try {
-            const doc = await firestore()
-                .collection(this.COLLECTION_NAME)
-                .doc(userId)
-                .get();
+            const userId = await this.getUserId();
+
+            // Use retry logic for Firestore operations
+            const doc = await this.retryOperation(
+                () => firestore()
+                    .collection(this.COLLECTION_NAME)
+                    .doc(userId)
+                    .get(),
+                'loadCollection'
+            );
 
             if (doc.exists()) {
                 const data = doc.data();
@@ -89,7 +153,7 @@ export class CollectionService {
                 return [];
             }
         } catch (error) {
-            console.error('Error loading collection:', error);
+            console.error('❌ Error loading collection:', error);
             return [];
         }
     }
